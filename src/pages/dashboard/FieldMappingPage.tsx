@@ -62,43 +62,12 @@ const FieldMappingPage: React.FC = () => {
 
   // Mock data fetching for fields
   useEffect(() => {
-    const mockFields: Field[] = [
-      {
-        id: '1',
-        name: 'North Field',
-        area: 2.5,
-        coordinates: [31.1471, 75.3412],
-        crop: 'Rice',
-        soilType: 'Clay Loam',
-        lastPlanted: '2024-03-01',
-      },
-      {
-        id: '2',
-        name: 'South Field',
-        area: 1.8,
-        coordinates: [31.1371, 75.3512],
-        crop: 'Wheat',
-        soilType: 'Silt Loam',
-        lastPlanted: '2024-02-15',
-      },
-    ];
+    // Initialize with empty fields instead of mock data
+    const mockFields: Field[] = [];
 
-    // Get user-specific fields if authenticated
-    if (userProfile.isAuthenticated) {
-      // In a real app, you would fetch fields specific to this user
-      // For demo, we'll add a field with the user's name
-      if (userProfile.name) {
-        mockFields.push({
-          id: '3',
-          name: `${userProfile.name}'s Field`,
-          area: 3.2,
-          coordinates: [31.1271, 75.3612],
-          crop: 'Cotton',
-          soilType: 'Sandy Loam',
-          lastPlanted: '2024-04-01',
-        });
-      }
-    }
+    // We'll only load fields after user has granted location access
+    // This will be triggered by the EnhancedMapComponent when a user clicks
+    // the "Detect my location" button
 
     setFields(mockFields);
     setLoading(false);
@@ -153,6 +122,47 @@ const FieldMappingPage: React.FC = () => {
     title: field.name,
     popup: `${field.area} hectares | ${field.crop || 'No crop'}`
   }));
+
+  // Handle successful location detection
+  const handleLocationDetected = (location: [number, number]) => {
+    // Once we have the user's location, we can load relevant fields
+    // In a real app, you would fetch fields near this location
+    const nearbyFields: Field[] = [
+      {
+        id: '1',
+        name: 'North Field',
+        area: 2.5,
+        coordinates: [location[0] + 0.01, location[1] + 0.01],
+        crop: 'Rice',
+        soilType: 'Clay Loam',
+        lastPlanted: '2024-03-01',
+      },
+      {
+        id: '2',
+        name: 'South Field',
+        area: 1.8,
+        coordinates: [location[0] - 0.01, location[1] + 0.01],
+        crop: 'Wheat',
+        soilType: 'Silt Loam',
+        lastPlanted: '2024-02-15',
+      },
+    ];
+
+    // If user is authenticated, add a personal field
+    if (userProfile.isAuthenticated && userProfile.name) {
+      nearbyFields.push({
+        id: '3',
+        name: `${userProfile.name}'s Field`,
+        area: 3.2,
+        coordinates: [location[0], location[1] + 0.02],
+        crop: 'Cotton',
+        soilType: 'Sandy Loam',
+        lastPlanted: '2024-04-01',
+      });
+    }
+
+    setFields(nearbyFields);
+  };
 
   // Handle map click for adding a new field
   const handleMapClick = (e: L.LeafletMouseEvent) => {
@@ -507,10 +517,10 @@ const FieldMappingPage: React.FC = () => {
             ) : (
               <EnhancedMapComponent
                 markers={fieldMarkers}
+                height="600px"
                 onMapClick={handleMapClick}
                 showSatellite={viewSatellite}
-                height="600px"
-                showCurrentLocationButton={true}
+                onLocationDetected={handleLocationDetected}
               />
             )}
           </div>

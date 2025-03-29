@@ -110,6 +110,65 @@ const mockData = {
   },
 };
 
+// Weather API service implementation for real-time weather data
+const fetchWeatherData = async (location: string) => {
+  try {
+    const apiKey = 'bad08676f5c5412abde204419252903'; // WeatherAPI key
+    const response = await axios.get(
+      `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${encodeURIComponent(location)}&days=5&aqi=no&alerts=no`
+    );
+    
+    // Map the API response to our app's data structure
+    if (response.data) {
+      const { current, forecast } = response.data;
+      
+      // Format forecast data
+      const forecastDays = forecast.forecastday.map((day: any) => {
+        const date = new Date(day.date);
+        const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+        
+        return {
+          day: weekday,
+          date: day.date,
+          temp: day.day.avgtemp_c,
+          rainfall: day.day.totalprecip_mm,
+          description: day.day.condition.text,
+          icon: day.day.condition.icon,
+          humidity: day.day.avghumidity,
+          maxTemp: day.day.maxtemp_c,
+          minTemp: day.day.mintemp_c,
+        };
+      });
+      
+      // Return formatted data
+      return {
+        current: {
+          temp: current.temp_c,
+          humidity: current.humidity,
+          description: current.condition.text,
+          rainfall: current.precip_mm,
+          windSpeed: current.wind_kph,
+          windDirection: current.wind_dir,
+          pressure: current.pressure_mb,
+          feelsLike: current.feelslike_c,
+          uv: current.uv,
+          icon: current.condition.icon,
+          time: current.last_updated,
+        },
+        forecast: forecastDays,
+        location: response.data.location.name,
+        region: response.data.location.region,
+        country: response.data.location.country,
+      };
+    }
+    
+    throw new Error('Invalid response from weather API');
+  } catch (error) {
+    console.error('Error fetching weather data:', error);
+    throw error;
+  }
+};
+
 // API service with methods for each feature
 export const apiService = {
   // Crop Recommendations
@@ -160,15 +219,14 @@ export const apiService = {
   // Weather Data
   getWeatherData: async (params: { location: string }) => {
     try {
-      // In a real application, we would make an API call:
-      // const response = await api.get('/weather', { params });
-      // return response.data;
-      
-      // For now, return mock data
-      return { data: mockData.weatherData };
+      // Try to fetch real weather data
+      const realWeatherData = await fetchWeatherData(params.location);
+      return { data: realWeatherData };
     } catch (error) {
-      console.error('Error fetching weather data:', error);
-      throw error;
+      console.error('Error fetching weather data, falling back to mock data:', error);
+      
+      // Fallback to mock data if real API fails
+      return { data: mockData.weatherData };
     }
   },
 

@@ -14,6 +14,7 @@ interface EnhancedMapComponentProps {
   onMapClick?: (e: L.LeafletMouseEvent) => void;
   showSatellite?: boolean;
   showCurrentLocationButton?: boolean;
+  onLocationDetected?: (location: [number, number]) => void;
 }
 
 const EnhancedMapComponent: React.FC<EnhancedMapComponentProps> = ({
@@ -23,6 +24,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapComponentProps> = ({
   onMapClick,
   showSatellite = false,
   showCurrentLocationButton = true,
+  onLocationDetected,
 }) => {
   const { preferences, updatePreferences } = useUser();
   const { t } = useTranslation();
@@ -64,6 +66,11 @@ const EnhancedMapComponent: React.FC<EnhancedMapComponentProps> = ({
           // Save to preferences if the user has opted in
           if (preferences.useCurrentLocation) {
             updatePreferences({ defaultLocation: newLocation });
+          }
+          
+          // Notify parent component of the detected location
+          if (onLocationDetected) {
+            onLocationDetected(newLocation);
           }
           
           setIsLocating(false);
