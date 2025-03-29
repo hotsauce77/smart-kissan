@@ -61,7 +61,7 @@ const LoginPage: React.FC = () => {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             {/* Welcome message */}
-            Access your farming insights and recommendations
+            Welcome to SmartKissan - Access your farming insights and recommendations
           </p>
         </div>
         

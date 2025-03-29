@@ -12,7 +12,7 @@ const ChatBot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! I am your farming assistant. How can I help you today?',
+      text: 'Hello! I am your SmartKissan Assistant. How can I help you today?',
       sender: 'bot',
       timestamp: new Date().toISOString(),
     },
@@ -75,7 +75,7 @@ const ChatBot: React.FC = () => {
   return (
     <div className="flex flex-col bg-white rounded-lg shadow h-[500px]">
       <div className="p-4 border-b">
-        <h2 className="text-lg font-medium">Farming Assistant</h2>
+        <h2 className="text-lg font-medium">SmartKissan Assistant</h2>
         <p className="text-sm text-gray-500">Ask questions about farming practices, crop recommendations, or weather insights.</p>
       </div>
 

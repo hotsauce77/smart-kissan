@@ -78,7 +78,7 @@ const RegisterPage: React.FC = () => {
             {t('action.register')}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Create your account to get personalized farming recommendations
+            Join SmartKissan to get personalized farming recommendations
           </p>
         </div>
         

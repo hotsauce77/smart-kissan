@@ -7,7 +7,7 @@ const LandingPage: React.FC = () => {
       <div className="mx-auto max-w-4xl py-32 sm:py-48 lg:py-56">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-            AI-Powered Farming Insights for Better Yields
+            SmartKissan: AI-Powered Farming Insights for Better Yields
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600">
             Get personalized crop recommendations, yield predictions, and real-time agricultural insights

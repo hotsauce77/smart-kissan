@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DataCard from '../../components/ui/DataCard';
 import LineChart from '../../components/charts/LineChart';
-import ChatBot from '../../components/ChatBot';
 import apiService from '../../services/api';
 import { Link } from 'react-router-dom';
 
@@ -181,6 +180,13 @@ const DashboardPage: React.FC = () => {
           title="Satellite Analysis"
           className="p-6 h-full"
           loading={loading}
+          footer={
+            <div className="text-sm">
+              <Link to="/field-mapping?mode=satellite" className="font-medium text-primary-600 hover:text-primary-500">
+                View detailed analysis
+              </Link>
+            </div>
+          }
         >
           {satelliteData && (
             <div className="space-y-4">
@@ -217,12 +223,6 @@ const DashboardPage: React.FC = () => {
             </div>
           )}
         </DataCard>
-      </div>
-
-      {/* Chat Bot */}
-      <div className="mt-8">
-        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Farming Assistant</h3>
-        <ChatBot />
       </div>
     </div>
   );

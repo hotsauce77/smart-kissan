@@ -6,10 +6,10 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import HelpPage from './pages/help/HelpPage';
 import FieldMappingPage from './pages/dashboard/FieldMappingPage';
-import SatelliteAnalysisPage from './pages/dashboard/SatelliteAnalysisPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ProfilePage from './pages/profile/ProfilePage';
+import ChatBotButton from './components/ChatBotButton';
 import UserProvider, { useUser } from './contexts/UserContext';
 
 // AuthGuard component to protect routes
@@ -46,63 +46,60 @@ const AppContent: React.FC = () => {
   }, [preferences.darkMode]);
   
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+    <>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        
+        {/* Protected routes */}
+        <Route element={<Layout />}>
+          <Route 
+            path="/dashboard" 
+            element={
+              <AuthGuard>
+                <DashboardPage />
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <AuthGuard>
+                <SettingsPage />
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/help" 
+            element={
+              <AuthGuard>
+                <HelpPage />
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/field-mapping" 
+            element={
+              <AuthGuard>
+                <FieldMappingPage />
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <AuthGuard>
+                <ProfilePage />
+              </AuthGuard>
+            } 
+          />
+        </Route>
+      </Routes>
       
-      {/* Protected routes */}
-      <Route element={<Layout />}>
-        <Route 
-          path="/dashboard" 
-          element={
-            <AuthGuard>
-              <DashboardPage />
-            </AuthGuard>
-          } 
-        />
-        <Route 
-          path="/settings" 
-          element={
-            <AuthGuard>
-              <SettingsPage />
-            </AuthGuard>
-          } 
-        />
-        <Route 
-          path="/help" 
-          element={
-            <AuthGuard>
-              <HelpPage />
-            </AuthGuard>
-          } 
-        />
-        <Route 
-          path="/field-mapping" 
-          element={
-            <AuthGuard>
-              <FieldMappingPage />
-            </AuthGuard>
-          } 
-        />
-        <Route 
-          path="/satellite-analysis" 
-          element={
-            <AuthGuard>
-              <SatelliteAnalysisPage />
-            </AuthGuard>
-          } 
-        />
-        <Route 
-          path="/profile" 
-          element={
-            <AuthGuard>
-              <ProfilePage />
-            </AuthGuard>
-          } 
-        />
-      </Route>
-    </Routes>
+      {/* Chatbot button that appears on all pages */}
+      <ChatBotButton />
+    </>
   );
 };
 

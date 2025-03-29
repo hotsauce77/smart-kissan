@@ -147,6 +147,27 @@ const SettingsPage: React.FC = () => {
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-medium mb-4">{t('settings.locationServices')}</h2>
           
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">Privacy Policy</h3>
+                <div className="mt-2 text-sm text-blue-700 dark:text-blue-400">
+                  <p>We value your privacy. Your location is <strong>never tracked automatically</strong> without your explicit permission. You can:</p>
+                  <ul className="list-disc list-inside mt-1">
+                    <li>Enable the "Use Current Location" setting below to allow us to detect your location when maps load</li>
+                    <li>Click the location button on any map to share your location just for that session</li>
+                    <li>Enter a default location manually instead of sharing your actual location</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           {/* Use Current Location Toggle */}
           <div className="flex items-center mb-4">
             <button
@@ -172,7 +193,7 @@ const SettingsPage: React.FC = () => {
             </span>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Automatically set the map to your current location.
+            When enabled, maps will automatically center on your current location. This requires your permission to access your device's location.
           </p>
           
           {/* Manual Location Setting */}

@@ -20,7 +20,17 @@ module.exports = {
           800: '#166534',
           900: '#14532d',
         }
-      }
+      },
+      animation: {
+        'fade-in-out': 'fadeInOut 4s ease-in-out infinite',
+        'pulse': 'pulse 2s infinite',
+      },
+      keyframes: {
+        fadeInOut: {
+          '0%, 100%': { opacity: 0 },
+          '30%, 70%': { opacity: 1 },
+        },
+      },
     },
   },
   plugins: [],

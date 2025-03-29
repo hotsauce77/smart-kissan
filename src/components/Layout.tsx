@@ -29,26 +29,20 @@ const Layout: React.FC = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <nav className="bg-white shadow dark:bg-gray-800 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Link to="/" className="text-xl font-bold text-primary-600 dark:text-blue-400">
-                Farming Advisor
+              <Link to="/" className="text-2xl font-bold text-primary-600 dark:text-blue-400">
+                SmartKissan
               </Link>
-              <div className="ml-10 flex items-baseline space-x-4">
-                <Link to="/dashboard" className={`${isActive('/dashboard')} hover:text-primary-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium`}>
+              <div className="ml-10 flex items-baseline space-x-6">
+                <Link to="/dashboard" className={`${isActive('/dashboard')} hover:text-primary-600 dark:hover:text-blue-400 px-4 py-3 rounded-md text-base font-medium`}>
                   {t('nav.dashboard')}
                 </Link>
-                <Link to="/field-mapping" className={`${isActive('/field-mapping')} hover:text-primary-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium`}>
+                <Link to="/field-mapping" className={`${isActive('/field-mapping')} hover:text-primary-600 dark:hover:text-blue-400 px-4 py-3 rounded-md text-base font-medium`}>
                   {t('nav.fieldMapping')}
                 </Link>
-                <Link to="/satellite-analysis" className={`${isActive('/satellite-analysis')} hover:text-primary-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium`}>
-                  {t('nav.satelliteAnalysis')}
-                </Link>
-                <Link to="/settings" className={`${isActive('/settings')} hover:text-primary-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium`}>
-                  {t('nav.settings')}
-                </Link>
-                <Link to="/help" className={`${isActive('/help')} hover:text-primary-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium`}>
+                <Link to="/help" className={`${isActive('/help')} hover:text-primary-600 dark:hover:text-blue-400 px-4 py-3 rounded-md text-base font-medium`}>
                   {t('nav.help')}
                 </Link>
               </div>
@@ -69,7 +63,7 @@ const Layout: React.FC = () => {
                   onClick={toggleProfileMenu}
                 >
                   <span className="sr-only">Open user menu</span>
-                  <div className="h-8 w-8 rounded-full flex items-center justify-center bg-primary-600 text-white dark:bg-blue-500">
+                  <div className="h-10 w-10 rounded-full flex items-center justify-center bg-primary-600 text-white dark:bg-blue-500">
                     {userProfile.name ? userProfile.name.charAt(0).toUpperCase() : 'U'}
                   </div>
                 </button>
@@ -128,7 +122,7 @@ const Layout: React.FC = () => {
       <footer className="bg-white shadow mt-auto dark:bg-gray-800 dark:border-t dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <p className="text-center text-gray-500 dark:text-gray-400">
-            © 2024 Farming Advisor. All rights reserved.
+            © 2024 SmartKissan. All rights reserved.
           </p>
         </div>
       </footer>
