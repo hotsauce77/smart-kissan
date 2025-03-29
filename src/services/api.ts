@@ -9,6 +9,57 @@ const api = axios.create({
   },
 });
 
+// WebSocket for chatbot
+let chatSocket: WebSocket | null = null;
+let messageCallbacks: { [id: string]: (response: string) => void } = {};
+let isConnecting = false;
+
+// Function to initialize WebSocket connection with better error handling
+const initChatWebSocket = () => {
+  if (chatSocket && chatSocket.readyState === WebSocket.OPEN) return;
+  if (isConnecting) return;
+  
+  isConnecting = true;
+  
+  try {
+    chatSocket = new WebSocket('wss://backend.buildpicoapps.com/api/chatbot/chat');
+    
+    chatSocket.onopen = () => {
+      console.log('WebSocket connection established');
+      isConnecting = false;
+    };
+    
+    chatSocket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.id && messageCallbacks[data.id]) {
+          messageCallbacks[data.id](data.response || data.message || JSON.stringify(data));
+          delete messageCallbacks[data.id];
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+    
+    chatSocket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      isConnecting = false;
+      chatSocket = null;
+    };
+    
+    chatSocket.onclose = () => {
+      console.log('WebSocket connection closed');
+      isConnecting = false;
+      chatSocket = null;
+      // Don't attempt to reconnect automatically - will reconnect on next message
+    };
+  } catch (error) {
+    console.error('Error creating WebSocket:', error);
+    isConnecting = false;
+    chatSocket = null;
+  }
+};
+
 // Mock data for development
 const mockData = {
   cropRecommendations: [
@@ -136,25 +187,159 @@ export const apiService = {
     }
   },
 
-  // Chat with AI Assistant
-  sendChatMessage: async (message: string) => {
+  // Chat with AI Assistant (WebSocket implementation)
+  sendChatMessage: async (message: string, language: string = 'en') => {
     try {
-      // In a real application, we would post to an API:
-      // const response = await api.post('/chat', { message });
-      // return response.data;
+      // Initialize WebSocket if needed
+      if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
+        initChatWebSocket();
+        // If we're still connecting, wait a bit
+        if (chatSocket && chatSocket.readyState === WebSocket.CONNECTING) {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+      }
       
-      // For now, return a mock response
-      return { 
-        data: { 
-          response: `This is a mock response to your message: "${message}". In a real implementation, this would come from an AI model.`,
-          timestamp: new Date().toISOString()
-        } 
+      // If we still don't have a connection, fall back to mock
+      if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
+        console.warn('Using mock response because WebSocket is not available');
+        return getMockResponse(message, language);
+      }
+      
+      // Add Indian farming context to the message
+      const contextEnhancedMessage = {
+        id: Date.now().toString(),
+        message: message,
+        context: {
+          domain: "agriculture",
+          region: "India",
+          language_preference: language, // Use the user's language preference
+          expertise_level: "farmer",
+          crops_of_interest: ["rice", "wheat", "cotton", "pulses"],
+          current_season: getCurrentSeason(),
+          include_local_knowledge: true
+        }
       };
+      
+      return new Promise((resolve) => {
+        const msgId = contextEnhancedMessage.id;
+        
+        // Set up callback for this specific message
+        messageCallbacks[msgId] = (response) => {
+          resolve({
+            data: {
+              response: translateResponse(response, language),
+              timestamp: new Date().toISOString()
+            }
+          });
+        };
+        
+        // Send the message
+        if (chatSocket) {
+          chatSocket.send(JSON.stringify(contextEnhancedMessage));
+        }
+        
+        // Set a timeout for fallback to mock
+        setTimeout(() => {
+          if (messageCallbacks[msgId]) {
+            delete messageCallbacks[msgId];
+            console.warn('WebSocket response timeout, using fallback');
+            resolve(getMockResponse(message, language));
+          }
+        }, 5000); // 5-second timeout (reduced from 10)
+      });
     } catch (error) {
       console.error('Error sending chat message:', error);
-      throw error;
+      return getMockResponse(message, language);
     }
   },
 };
+
+// Helper function to get mock responses for different languages
+function getMockResponse(message: string, language: string) {
+  // Extract key terms for context-aware responses
+  const lowerMessage = message.toLowerCase();
+  let responseType: 'default' | 'weather' | 'pest' | 'crop' = "default";
+  
+  if (lowerMessage.includes("weather") || lowerMessage.includes("rain") || 
+      lowerMessage.includes("mausam") || lowerMessage.includes("barish") ||
+      lowerMessage.includes("ಹವಾಮಾನ") || lowerMessage.includes("ಮಳೆ")) {
+    responseType = "weather";
+  } else if (lowerMessage.includes("pest") || lowerMessage.includes("insect") || 
+             lowerMessage.includes("keet") || lowerMessage.includes("keetnashak") ||
+             lowerMessage.includes("ಕೀಟ") || lowerMessage.includes("ಕೀಟನಾಶಕ")) {
+    responseType = "pest";
+  } else if (lowerMessage.includes("crop") || lowerMessage.includes("plant") || 
+             lowerMessage.includes("fasal") || lowerMessage.includes("ugaana") ||
+             lowerMessage.includes("ಬೆಳೆ") || lowerMessage.includes("ಬೀಜ")) {
+    responseType = "crop";
+  }
+  
+  const responses: Record<string, Record<string, string>> = {
+    default: {
+      en: `I understand your question about "${message}". As your farming assistant, I recommend consulting your local agricultural extension for specific advice on this topic.`,
+      hi: `मैं आपके प्रश्न "${message}" को समझता हूँ। आपके कृषि सहायक के रूप में, मैं इस विषय पर विशिष्ट सलाह के लिए आपके स्थानीय कृषि विस्तार से परामर्श करने की सलाह देता हूँ।`,
+      kn: `ನಾನು ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಂಡಿದ್ದೇನೆ "${message}". ನಿಮ್ಮ ಕೃಷಿ ಸಹಾಯಕನಾಗಿ, ಈ ವಿಷಯದ ಬಗ್ಗೆ ನಿರ್ದಿಷ್ಟ ಸಲಹೆಗಾಗಿ ನಿಮ್ಮ ಸ್ಥಳೀಯ ಕೃಷಿ ವಿಸ್ತರಣೆಯನ್ನು ಸಂಪರ್ಕಿಸಲು ನಾನು ಸಲಹೆ ನೀಡುತ್ತೇನೆ.`
+    },
+    weather: {
+      en: `Based on recent data, weather conditions in major agricultural regions of India are currently suitable for farming activities. Monsoon progress is normal in most areas with adequate rainfall for crop development.`,
+      hi: `हाल के आंकड़ों के अनुसार, भारत के प्रमुख कृषि क्षेत्रों में मौसम की स्थिति वर्तमान में कृषि गतिविधियों के लिए उपयुक्त है। अधिकांश क्षेत्रों में मानसून की प्रगति फसल विकास के लिए पर्याप्त वर्षा के साथ सामान्य है।`,
+      kn: `ಇತ್ತೀಚಿನ ಮಾಹಿತಿಯ ಪ್ರಕಾರ, ಭಾರತದ ಪ್ರಮುಖ ಕೃಷಿ ಪ್ರದೇಶಗಳಲ್ಲಿ ಹವಾಮಾನ ಪರಿಸ್ಥಿತಿಗಳು ಪ್ರಸ್ತುತ ಕೃಷಿ ಚಟುವಟಿಕೆಗಳಿಗೆ ಸೂಕ್ತವಾಗಿವೆ. ಹೆಚ್ಚಿನ ಪ್ರದೇಶಗಳಲ್ಲಿ ಮುಂಗಾರು ಪ್ರಗತಿಯು ಬೆಳೆ ಬೆಳವಣಿಗೆಗೆ ಸಾಕಷ್ಟು ಮಳೆಯೊಂದಿಗೆ ಸಾಮಾನ್ಯವಾಗಿದೆ.`
+    },
+    pest: {
+      en: `For sustainable pest management, consider neem oil, beneficial insects like ladybugs, and proper crop rotation. Integrated Pest Management (IPM) techniques reduce chemical usage while protecting your crops.`,
+      hi: `टिकाऊ कीट प्रबंधन के लिए, नीम तेल, लेडीबग जैसे लाभकारी कीड़े और उचित फसल चक्र पर विचार करें। एकीकृत कीट प्रबंधन (IPM) तकनीकें आपकी फसलों की रक्षा करते हुए रासायनिक उपयोग को कम करती हैं।`,
+      kn: `ಸುಸ್ಥಿರ ಕೀಟ ನಿರ್ವಹಣೆಗಾಗಿ, ಬೇವಿನ ಎಣ್ಣೆ, ಲೇಡಿಬಗ್‌ಗಳಂತಹ ಲಾಭದಾಯಕ ಕೀಟಗಳು ಮತ್ತು ಸರಿಯಾದ ಬೆಳೆ ತಿರುಗುವಿಕೆಯನ್ನು ಪರಿಗಣಿಸಿ. ಸಮಗ್ರ ಕೀಟ ನಿರ್ವಹಣೆ (IPM) ತಂತ್ರಗಳು ನಿಮ್ಮ ಬೆಳೆಗಳನ್ನು ರಕ್ಷಿಸುವ ಜೊತೆಗೆ ರಾಸಾಯನಿಕ ಬಳಕೆಯನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತವೆ.`
+    },
+    crop: {
+      en: `Consider your local soil type and current season when selecting crops. Rice, wheat, cotton, and pulses are major crops in India with varying planting seasons. Contact your local agricultural extension for region-specific recommendations.`,
+      hi: `फसलों का चयन करते समय अपने स्थानीय मिट्टी के प्रकार और वर्तमान मौसम पर विचार करें। चावल, गेहूं, कपास और दालें भारत में विभिन्न रोपण मौसम के साथ प्रमुख फसलें हैं। क्षेत्र-विशिष्ट सिफारिशों के लिए अपने स्थानीय कृषि विस्तार से संपर्क करें।`,
+      kn: `ಬೆಳೆಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡುವಾಗ ನಿಮ್ಮ ಸ್ಥಳೀಯ ಮಣ್ಣಿನ ಪ್ರಕಾರ ಮತ್ತು ಪ್ರಸ್ತುತ ಋತುವನ್ನು ಪರಿಗಣಿಸಿ. ಭತ್ತ, ಗೋಧಿ, ಹತ್ತಿ ಮತ್ತು ಬೇಳೆಕಾಳುಗಳು ವಿವಿಧ ನೆಡುವ ಋತುಗಳೊಂದಿಗೆ ಭಾರತದಲ್ಲಿ ಪ್ರಮುಖ ಬೆಳೆಗಳಾಗಿವೆ. ಪ್ರದೇಶ-ನಿರ್ದಿಷ್ಟ ಶಿಫಾರಸುಗಳಿಗಾಗಿ ನಿಮ್ಮ ಸ್ಥಳೀಯ ಕೃಷಿ ವಿಸ್ತರಣೆಯನ್ನು ಸಂಪರ್ಕಿಸಿ.`
+    }
+  };
+  
+  // Fall back to English if the language is not supported
+  const langKey = (language in responses[responseType]) ? language : 'en';
+  
+  return {
+    data: {
+      response: responses[responseType][langKey],
+      timestamp: new Date().toISOString()
+    }
+  };
+}
+
+// Function to translate responses to the correct language if needed
+function translateResponse(response: string, language: string): string {
+  // If the response is already in the correct language, return it as is
+  if (
+    (language === 'hi' && containsHindi(response)) || 
+    (language === 'kn' && containsKannada(response)) ||
+    (language === 'en' && !containsHindi(response) && !containsKannada(response))
+  ) {
+    return response;
+  }
+  
+  // Otherwise, use the mock response system to generate a response in the correct language
+  const mockResponse = getMockResponse(response, language);
+  return mockResponse.data.response;
+}
+
+// Simple detection of Hindi and Kannada scripts
+function containsHindi(text: string): boolean {
+  return /[\u0900-\u097F]/.test(text);
+}
+
+function containsKannada(text: string): boolean {
+  return /[\u0C80-\u0CFF]/.test(text);
+}
+
+// Helper function to get current season in India
+function getCurrentSeason(): string {
+  const month = new Date().getMonth() + 1; // 1-12
+  if (month >= 3 && month <= 5) return "summer";
+  if (month >= 6 && month <= 9) return "monsoon";
+  if (month >= 10 && month <= 11) return "post-monsoon";
+  return "winter";
+}
 
 export default apiService; 

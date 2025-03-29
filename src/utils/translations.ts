@@ -191,6 +191,53 @@ const translations: Translation = {
     hi: 'नक्शे पर अपना वर्तमान स्थान देखने के लिए कृपया स्थान एक्सेस की अनुमति दें',
     kn: 'ನಕ್ಷೆಯಲ್ಲಿ ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಸ್ಥಾನವನ್ನು ನೋಡಲು ದಯವಿಟ್ಟು ಸ್ಥಳ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸಿ',
   },
+
+  // Help Page
+  'help.title': {
+    en: 'Help & FAQ',
+    hi: 'सहायता और अक्सर पूछे जाने वाले प्रश्न',
+    kn: 'ಸಹಾಯ ಮತ್ತು ಪದೇ ಪದೇ ಕೇಳಲಾಗುವ ಪ್ರಶ್ನೆಗಳು',
+  },
+  'help.faq1.question': {
+    en: 'How are crop recommendations generated?',
+    hi: 'फसल की सिफारिशें कैसे तैयार की जाती हैं?',
+    kn: 'ಬೆಳೆ ಶಿಫಾರಸುಗಳನ್ನು ಹೇಗೆ ರಚಿಸಲಾಗುತ್ತದೆ?',
+  },
+  'help.faq1.answer': {
+    en: 'Our AI system analyzes various factors including soil conditions, weather patterns, and historical crop data to provide personalized recommendations for your farm.',
+    hi: 'हमारी AI प्रणाली मिट्टी की स्थिति, मौसम के पैटर्न और ऐतिहासिक फसल डेटा सहित विभिन्न कारकों का विश्लेषण करके आपके खेत के लिए व्यक्तिगत सिफारिशें प्रदान करती है।',
+    kn: 'ನಮ್ಮ AI ವ್ಯವಸ್ಥೆಯು ನಿಮ್ಮ ಕೃಷಿಗೆ ವೈಯಕ್ತಿಕ ಶಿಫಾರಸುಗಳನ್ನು ಒದಗಿಸಲು ಮಣ್ಣಿನ ಪರಿಸ್ಥಿತಿಗಳು, ಹವಾಮಾನ ಮಾದರಿಗಳು ಮತ್ತು ಐತಿಹಾಸಿಕ ಬೆಳೆ ಡೇಟಾ ಸೇರಿದಂತೆ ವಿವಿಧ ಅಂಶಗಳನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತದೆ.',
+  },
+  'help.faq2.question': {
+    en: 'How accurate are the yield predictions?',
+    hi: 'उपज भविष्यवाणियां कितनी सटीक हैं?',
+    kn: 'ಇಳುವರಿ ಮುನ್ಸೂಚನೆಗಳು ಎಷ್ಟು ನಿಖರವಾಗಿವೆ?',
+  },
+  'help.faq2.answer': {
+    en: 'Yield predictions are based on machine learning models trained on extensive agricultural data. The accuracy typically ranges from 80-90% depending on data availability.',
+    hi: 'उपज भविष्यवाणियां मशीन लर्निंग मॉडल पर आधारित हैं जो व्यापक कृषि डेटा पर प्रशिक्षित हैं। सटीकता आमतौर पर डेटा उपलब्धता के आधार पर 80-90% के बीच होती है।',
+    kn: 'ಇಳುವರಿ ಮುನ್ಸೂಚನೆಗಳು ವ್ಯಾಪಕವಾದ ಕೃಷಿ ಡೇಟಾದಲ್ಲಿ ತರಬೇತಿ ಪಡೆದ ಮಷೀನ್ ಲರ್ನಿಂಗ್ ಮಾದರಿಗಳನ್ನು ಆಧರಿಸಿವೆ. ಡೇಟಾ ಲಭ್ಯತೆಯನ್ನು ಅವಲಂಬಿಸಿ ನಿಖರತೆಯು ಸಾಮಾನ್ಯವಾಗಿ 80-90% ವ್ಯಾಪ್ತಿಯಲ್ಲಿರುತ್ತದೆ.',
+  },
+  'help.faq3.question': {
+    en: 'How often is the weather data updated?',
+    hi: 'मौसम डेटा कितनी बार अपडेट किया जाता है?',
+    kn: 'ಹವಾಮಾನ ದತ್ತಾಂಶವನ್ನು ಎಷ್ಟು ಬಾರಿ ನವೀಕರಿಸಲಾಗುತ್ತದೆ?',
+  },
+  'help.faq3.answer': {
+    en: 'Weather forecasts are updated every 3 hours using data from multiple meteorological sources to ensure accuracy.',
+    hi: 'मौसम का पूर्वानुमान सटीकता सुनिश्चित करने के लिए कई मौसम विज्ञान स्रोतों से डेटा का उपयोग करके हर 3 घंटे में अपडेट किया जाता है।',
+    kn: 'ಹವಾಮಾನ ಮುನ್ಸೂಚನೆಗಳನ್ನು ನಿಖರತೆಯನ್ನು ಖಚಿತಪಡಿಸಲು ಬಹು ಹವಾಮಾನ ಮೂಲಗಳಿಂದ ಡೇಟಾವನ್ನು ಬಳಸಿಕೊಂಡು ಪ್ರತಿ 3 ಗಂಟೆಗಳಿಗೊಮ್ಮೆ ನವೀಕರಿಸಲಾಗುತ್ತದೆ.',
+  },
+  'help.faq4.question': {
+    en: 'Can I get notifications for important updates?',
+    hi: 'क्या मुझे महत्वपूर्ण अपडेट के लिए सूचनाएं मिल सकती हैं?',
+    kn: 'ಪ್ರಮುಖ ನವೀಕರಣಗಳಿಗೆ ನಾನು ಅಧಿಸೂಚನೆಗಳನ್ನು ಪಡೆಯಬಹುದೇ?',
+  },
+  'help.faq4.answer': {
+    en: 'Yes, you can enable notifications in the Settings page to receive alerts about weather changes, optimal planting times, and other important farming updates.',
+    hi: 'हां, आप मौसम परिवर्तन, बुवाई के अनुकूल समय और अन्य महत्वपूर्ण कृषि अपडेट के बारे में अलर्ट प्राप्त करने के लिए सेटिंग्स पेज में सूचनाएं सक्षम कर सकते हैं।',
+    kn: 'ಹೌದು, ಹವಾಮಾನ ಬದಲಾವಣೆಗಳು, ಅನುಕೂಲ ಬೀಜ ಬಿತ್ತನೆ ಸಮಯಗಳು ಮತ್ತು ಇತರ ಪ್ರಮುಖ ಕೃಷಿ ನವೀಕರಣಗಳ ಬಗ್ಗೆ ಎಚ್ಚರಿಕೆಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ನೀವು ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಪುಟದಲ್ಲಿ ಅಧಿಸೂಚನೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಬಹುದು.',
+  },
 };
 
 // Helper function to get a translation

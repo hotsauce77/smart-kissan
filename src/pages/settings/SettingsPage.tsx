@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUser, UserPreferences } from '../../contexts/UserContext';
 import useTranslation from '../../hooks/useTranslation';
 
@@ -8,6 +8,15 @@ const SettingsPage: React.FC = () => {
   const [customLocation, setCustomLocation] = useState<string>(
     preferences.defaultLocation.join(',')
   );
+
+  // Apply dark mode immediately when changed in settings
+  useEffect(() => {
+    if (preferences.darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [preferences.darkMode]);
 
   // Handle language change
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -86,19 +95,19 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6">{t('nav.settings')}</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">{t('nav.settings')}</h1>
       
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
         {/* Language Settings */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-medium mb-4">{t('settings.language')}</h2>
+          <h2 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">{t('settings.language')}</h2>
           <div className="mb-4">
-            <label htmlFor="language" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="language" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               {t('settings.language')}
             </label>
             <select
               id="language"
-              className="block w-full max-w-md rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="block w-full max-w-md rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
               value={preferences.language}
               onChange={handleLanguageChange}
             >
@@ -106,7 +115,7 @@ const SettingsPage: React.FC = () => {
               <option value="hi">हिन्दी (Hindi)</option>
               <option value="kn">ಕನ್ನಡ (Kannada)</option>
             </select>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
               Change the language of the application interface.
             </p>
           </div>
@@ -114,7 +123,7 @@ const SettingsPage: React.FC = () => {
         
         {/* Notification Settings */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-medium mb-4">{t('settings.notifications')}</h2>
+          <h2 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">{t('settings.notifications')}</h2>
           <div className="flex items-center mb-4">
             <button
               type="button"
@@ -138,25 +147,25 @@ const SettingsPage: React.FC = () => {
               {t('settings.notifications')}
             </span>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dark:text-gray-300">
             Receive notifications about weather, crop prices, and agricultural alerts.
           </p>
         </div>
         
         {/* Location Settings */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-medium mb-4">{t('settings.locationServices')}</h2>
+          <h2 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">{t('settings.locationServices')}</h2>
           
-          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800">
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-md border border-blue-200 dark:border-blue-800">
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">Privacy Policy</h3>
-                <div className="mt-2 text-sm text-blue-700 dark:text-blue-400">
+                <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
                   <p>We value your privacy. Your location is <strong>never tracked automatically</strong> without your explicit permission. You can:</p>
                   <ul className="list-disc list-inside mt-1">
                     <li>Enable the "Use Current Location" setting below to allow us to detect your location when maps load</li>
@@ -192,13 +201,13 @@ const SettingsPage: React.FC = () => {
               {t('settings.useCurrentLocation')}
             </span>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          <p className="text-sm text-gray-500 dark:text-gray-300 mb-4">
             When enabled, maps will automatically center on your current location. This requires your permission to access your device's location.
           </p>
           
           {/* Manual Location Setting */}
           <div className="mt-4">
-            <label htmlFor="custom-location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="custom-location" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               {t('settings.defaultLocation')} (Latitude, Longitude)
             </label>
             <div className="flex max-w-md">
@@ -220,7 +229,7 @@ const SettingsPage: React.FC = () => {
                 {t('action.save')}
               </button>
             </div>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
               Set a default location for maps when current location is not used.
             </p>
           </div>
@@ -228,7 +237,7 @@ const SettingsPage: React.FC = () => {
         
         {/* Dark Mode Settings */}
         <div className="p-6">
-          <h2 className="text-lg font-medium mb-4">{t('settings.darkMode')}</h2>
+          <h2 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">{t('settings.darkMode')}</h2>
           <div className="flex items-center">
             <button
               type="button"
@@ -249,11 +258,11 @@ const SettingsPage: React.FC = () => {
               ></span>
             </button>
             <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-100">
-              {t('settings.darkMode')}
+              {preferences.darkMode ? 'Dark Mode Enabled' : 'Enable Dark Mode'}
             </span>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            Switch between light and dark mode for better readability.
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
+            Toggle between light and dark mode for the application interface.
           </p>
         </div>
       </div>

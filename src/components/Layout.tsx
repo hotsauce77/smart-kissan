@@ -3,11 +3,12 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import useTranslation from '../hooks/useTranslation';
 import NotificationCenter from './NotificationCenter';
+import translations from '../utils/translations';
 
 const Layout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userProfile, logout } = useUser();
+  const { userProfile, logout, preferences } = useUser();
   const { t } = useTranslation();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
@@ -24,6 +25,19 @@ const Layout: React.FC = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  // Function to get the menu text with English in brackets
+  const getMenuText = (translationKey: string) => {
+    // Only add English in brackets if not already in English
+    if (preferences.language === 'en') {
+      return t(translationKey);
+    }
+    
+    // Get the English text for the translation key
+    const englishText = translations[translationKey]?.en || translationKey;
+    
+    return `${t(translationKey)} (${englishText})`;
   };
 
   return (
@@ -71,7 +85,7 @@ const Layout: React.FC = () => {
                 {/* User Dropdown */}
                 {isProfileMenuOpen && (
                   <div
-                    className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-gray-700"
+                    className="origin-top-right absolute right-0 mt-2 w-64 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-gray-700"
                     role="menu"
                     aria-orientation="vertical"
                     aria-labelledby="user-menu-button"
@@ -85,7 +99,7 @@ const Layout: React.FC = () => {
                       id="user-menu-item-0"
                       onClick={() => setIsProfileMenuOpen(false)}
                     >
-                      {t('nav.profile')}
+                      {getMenuText('nav.profile')}
                     </Link>
                     <Link
                       to="/settings"
@@ -95,7 +109,7 @@ const Layout: React.FC = () => {
                       id="user-menu-item-1"
                       onClick={() => setIsProfileMenuOpen(false)}
                     >
-                      {t('nav.settings')}
+                      {getMenuText('nav.settings')}
                     </Link>
                     <button
                       type="button"
@@ -105,7 +119,7 @@ const Layout: React.FC = () => {
                       id="user-menu-item-2"
                       onClick={handleLogout}
                     >
-                      {t('action.logout')}
+                      {getMenuText('action.logout')}
                     </button>
                   </div>
                 )}
@@ -122,7 +136,7 @@ const Layout: React.FC = () => {
       <footer className="bg-white shadow mt-auto dark:bg-gray-800 dark:border-t dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <p className="text-center text-gray-500 dark:text-gray-400">
-            © 2024 SmartKissan. All rights reserved.
+            © 2025 SmartKissan. All rights reserved.
           </p>
         </div>
       </footer>

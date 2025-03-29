@@ -36,7 +36,7 @@ interface UserContextType {
 // Default preferences
 const defaultPreferences: UserPreferences = {
   language: 'en',
-  darkMode: false,
+  darkMode: true,
   notificationsEnabled: true,
   useCurrentLocation: false,
   defaultLocation: [31.1471, 75.3412], // Default: Punjab, India

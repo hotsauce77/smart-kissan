@@ -1,22 +1,26 @@
 import React from 'react';
+import useTranslation from '../../hooks/useTranslation';
 
 const HelpPage: React.FC = () => {
+  const { t } = useTranslation();
+  
+  // FAQ data structure with translation keys
   const faqs = [
     {
-      question: 'How are crop recommendations generated?',
-      answer: 'Our AI system analyzes various factors including soil conditions, weather patterns, and historical crop data to provide personalized recommendations for your farm.'
+      questionKey: 'help.faq1.question',
+      answerKey: 'help.faq1.answer'
     },
     {
-      question: 'How accurate are the yield predictions?',
-      answer: 'Yield predictions are based on machine learning models trained on extensive agricultural data. The accuracy typically ranges from 80-90% depending on data availability.'
+      questionKey: 'help.faq2.question',
+      answerKey: 'help.faq2.answer'
     },
     {
-      question: 'How often is the weather data updated?',
-      answer: 'Weather forecasts are updated every 3 hours using data from multiple meteorological sources to ensure accuracy.'
+      questionKey: 'help.faq3.question',
+      answerKey: 'help.faq3.answer'
     },
     {
-      question: 'Can I get notifications for important updates?',
-      answer: 'Yes, you can enable notifications in the Settings page to receive alerts about weather changes, optimal planting times, and other important farming updates.'
+      questionKey: 'help.faq4.question',
+      answerKey: 'help.faq4.answer'
     }
   ];
 
@@ -25,7 +29,7 @@ const HelpPage: React.FC = () => {
       <div className="md:flex md:items-center md:justify-between">
         <div className="min-w-0 flex-1">
           <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tight">
-            Help & FAQ
+            {t('help.title')}
           </h2>
         </div>
       </div>
@@ -37,34 +41,13 @@ const HelpPage: React.FC = () => {
               {faqs.map((faq, index) => (
                 <div key={index} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-b-0 last:pb-0">
                   <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
-                    {faq.question}
+                    {t(faq.questionKey)}
                   </h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    {faq.answer}
+                    {t(faq.answerKey)}
                   </p>
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
-              Need more help?
-            </h3>
-            <div className="mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400">
-              <p>
-                Contact our support team for personalized assistance with your farming needs.
-              </p>
-            </div>
-            <div className="mt-5">
-              <button
-                type="button"
-                className="btn-primary"
-              >
-                Contact Support
-              </button>
             </div>
           </div>
         </div>

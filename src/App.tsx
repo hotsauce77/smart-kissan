@@ -34,16 +34,19 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 // AppContent component that uses hooks (can't use hooks directly in App)
 const AppContent: React.FC = () => {
-  const { preferences } = useUser();
+  const { preferences, isLoading } = useUser();
   
   // Apply dark mode class to the html element
   useEffect(() => {
-    if (preferences.darkMode) {
+    // Default to dark mode until user preferences are loaded
+    if (isLoading) {
+      document.documentElement.classList.add('dark');
+    } else if (preferences.darkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [preferences.darkMode]);
+  }, [preferences.darkMode, isLoading]);
   
   return (
     <>
