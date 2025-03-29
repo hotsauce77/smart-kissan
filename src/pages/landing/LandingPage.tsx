@@ -95,7 +95,7 @@ const LandingPage: React.FC = () => {
                 <div className="relative h-full w-full">
                   <img 
                     src="https://images.pexels.com/photos/2382904/pexels-photo-2382904.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1" 
-                    alt="Photo of people working on a cropland" 
+                    alt="SmartKissan" 
                     className="h-full w-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
