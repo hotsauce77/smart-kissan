@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MapComponent from './MapComponent';
 import { useUser } from '../../contexts/UserContext';
 import useTranslation from '../../hooks/useTranslation';
@@ -15,6 +15,7 @@ interface EnhancedMapComponentProps {
   showSatellite?: boolean;
   showCurrentLocationButton?: boolean;
   onLocationDetected?: (location: [number, number]) => void;
+  zoomLevel?: number;
 }
 
 const EnhancedMapComponent: React.FC<EnhancedMapComponentProps> = ({
@@ -25,6 +26,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapComponentProps> = ({
   showSatellite = false,
   showCurrentLocationButton = true,
   onLocationDetected,
+  zoomLevel = 13,
 }) => {
   const { preferences, updatePreferences } = useUser();
   const { t } = useTranslation();
@@ -37,11 +39,17 @@ const EnhancedMapComponent: React.FC<EnhancedMapComponentProps> = ({
     popup: string;
   } | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+  const mapRef = useRef<L.Map | null>(null);
   
   // When preferences change, update the center but don't detect location automatically
   useEffect(() => {
     setCenter(preferences.defaultLocation);
   }, [preferences.defaultLocation]);
+
+  // Save map reference when it becomes available
+  const handleMapReady = (map: L.Map) => {
+    mapRef.current = map;
+  };
 
   // Detect user's current location only when requested
   const detectCurrentLocation = () => {
@@ -57,6 +65,12 @@ const EnhancedMapComponent: React.FC<EnhancedMapComponentProps> = ({
           ];
           // Update the center and add the marker
           setCenter(newLocation);
+          
+          // If we have a map reference, set the view with the desired zoom level
+          if (mapRef.current) {
+            mapRef.current.setView(newLocation, zoomLevel);
+          }
+          
           setCurrentLocationMarker({
             position: newLocation,
             title: 'Your Location',
@@ -103,6 +117,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapComponentProps> = ({
         width={width}
         onMapClick={onMapClick}
         showSatellite={showSatellite}
+        onMapReady={handleMapReady}
       />
       
       {showCurrentLocationButton && (

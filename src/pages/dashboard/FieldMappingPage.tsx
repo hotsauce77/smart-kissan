@@ -5,12 +5,13 @@ import DataCard from '../../components/ui/DataCard';
 import LineChart from '../../components/charts/LineChart';
 import { useUser } from '../../contexts/UserContext';
 import useTranslation from '../../hooks/useTranslation';
+import NdviDashboard from '../../components/dashboard/NdviDashboard';
 
 // Field interface
 interface Field {
   id: string;
   name: string;
-  area: number; // in hectares
+  area: number; // in acres
   coordinates: [number, number];
   crop?: string;
   soilType?: string;
@@ -78,41 +79,10 @@ const FieldMappingPage: React.FC = () => {
     if (selectedField && analysisMode) {
       setLoading(true);
       
-      // Mock API response for satellite data
+      // Set loading false after a delay (NDVI component will handle its own loading)
       setTimeout(() => {
-        const mockAnalysisData: AnalysisData = {
-          ndvi: 0.72,
-          soilMoisture: 65,
-          lastUpdated: '2024-03-28',
-          healthStatus: 'Good',
-          healthTrend: [
-            { date: '2024-01-01', ndvi: 0.65 },
-            { date: '2024-01-15', ndvi: 0.68 },
-            { date: '2024-02-01', ndvi: 0.70 },
-            { date: '2024-02-15', ndvi: 0.69 },
-            { date: '2024-03-01', ndvi: 0.71 },
-            { date: '2024-03-15', ndvi: 0.72 },
-            { date: '2024-03-28', ndvi: 0.72 },
-          ],
-          soilMoistureTrend: [
-            { date: '2024-01-01', moisture: 60 },
-            { date: '2024-01-15', moisture: 62 },
-            { date: '2024-02-01', moisture: 58 },
-            { date: '2024-02-15', moisture: 63 },
-            { date: '2024-03-01', moisture: 67 },
-            { date: '2024-03-15', moisture: 65 },
-            { date: '2024-03-28', moisture: 65 },
-          ],
-          recommendations: [
-            'Crop health is good, continue current irrigation schedule',
-            'Monitor the eastern section for potential nitrogen deficiency',
-            'Consider reducing water frequency if no rain in next 7 days',
-          ],
-        };
-        
-        setAnalysisData(mockAnalysisData);
         setLoading(false);
-      }, 1000);
+      }, 500);
     }
   }, [selectedField, analysisMode]);
 
@@ -120,7 +90,7 @@ const FieldMappingPage: React.FC = () => {
   const fieldMarkers = fields.map(field => ({
     position: field.coordinates,
     title: field.name,
-    popup: `${field.area} hectares | ${field.crop || 'No crop'}`
+    popup: `${field.area} acres | ${field.crop || 'No crop'}`
   }));
 
   // Handle successful location detection
@@ -131,7 +101,7 @@ const FieldMappingPage: React.FC = () => {
       {
         id: '1',
         name: 'North Field',
-        area: 2.5,
+        area: 6.2,
         coordinates: [location[0] + 0.01, location[1] + 0.01],
         crop: 'Rice',
         soilType: 'Clay Loam',
@@ -140,7 +110,7 @@ const FieldMappingPage: React.FC = () => {
       {
         id: '2',
         name: 'South Field',
-        area: 1.8,
+        area: 4.5,
         coordinates: [location[0] - 0.01, location[1] + 0.01],
         crop: 'Wheat',
         soilType: 'Silt Loam',
@@ -153,7 +123,7 @@ const FieldMappingPage: React.FC = () => {
       nearbyFields.push({
         id: '3',
         name: `${userProfile.name}'s Field`,
-        area: 3.2,
+        area: 7.9,
         coordinates: [location[0], location[1] + 0.02],
         crop: 'Cotton',
         soilType: 'Sandy Loam',
@@ -177,7 +147,7 @@ const FieldMappingPage: React.FC = () => {
     if (newFieldCoordinates && newFieldName && newFieldArea) {
       const area = parseFloat(newFieldArea);
       if (isNaN(area)) {
-        alert('Please enter a valid area');
+        alert('Please enter a valid area in acres');
         return;
       }
 
@@ -214,22 +184,6 @@ const FieldMappingPage: React.FC = () => {
     setSelectedField(field);
     setAnalysisMode(true);
     setViewSatellite(true);
-  };
-
-  // Convert health status to color
-  const getHealthStatusColor = (status: string) => {
-    switch (status) {
-      case 'Excellent':
-        return 'bg-green-500';
-      case 'Good':
-        return 'bg-green-400';
-      case 'Fair':
-        return 'bg-yellow-500';
-      case 'Poor':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-400';
-    }
   };
 
   return (
@@ -304,7 +258,7 @@ const FieldMappingPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Area (hectares)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Area (acres)</label>
                 <input
                   type="text"
                   value={newFieldArea}
@@ -355,7 +309,7 @@ const FieldMappingPage: React.FC = () => {
                     >
                       <div className="font-medium text-gray-900 dark:text-white">{field.name}</div>
                       {field.area && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{field.area} hectares</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{field.area} acres</div>
                       )}
                     </li>
                   ))
@@ -380,6 +334,7 @@ const FieldMappingPage: React.FC = () => {
                     showSatellite={true}
                     height="400px"
                     showCurrentLocationButton={false}
+                    zoomLevel={15}
                   />
                 </div>
 
@@ -391,113 +346,14 @@ const FieldMappingPage: React.FC = () => {
                       <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
                     </div>
                   </div>
-                ) : analysisData ? (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <DataCard
-                        title="Vegetation Index (NDVI)"
-                        value={analysisData.ndvi.toFixed(2)}
-                      >
-                        <div className="mt-2">
-                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div 
-                              className="bg-green-500 h-2 rounded-full" 
-                              style={{ width: `${analysisData.ndvi * 100}%` }}
-                            ></div>
-                          </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            0 = No vegetation, 1 = Dense vegetation
-                          </p>
-                        </div>
-                      </DataCard>
-
-                      <DataCard
-                        title="Soil Moisture"
-                        value={`${analysisData.soilMoisture}%`}
-                      >
-                        <div className="mt-2">
-                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div 
-                              className="bg-blue-500 h-2 rounded-full" 
-                              style={{ width: `${analysisData.soilMoisture}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      </DataCard>
-
-                      <DataCard
-                        title="Crop Health Status"
-                        value={analysisData.healthStatus}
-                      >
-                        <div className="mt-2 flex items-center">
-                          <span className={`inline-block w-3 h-3 rounded-full mr-2 ${getHealthStatusColor(analysisData.healthStatus)}`}></span>
-                          <span className="text-sm">{analysisData.healthStatus}</span>
-                        </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          Last updated: {new Date(analysisData.lastUpdated).toLocaleDateString()}
-                        </p>
-                      </DataCard>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-                        <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">Health Trend</h3>
-                        <LineChart
-                          title=""
-                          labels={analysisData.healthTrend.map(item => new Date(item.date).toLocaleDateString())}
-                          datasets={[
-                            {
-                              label: 'NDVI',
-                              data: analysisData.healthTrend.map(item => item.ndvi),
-                            },
-                          ]}
-                          yAxisLabel="NDVI"
-                          xAxisLabel="Date"
-                        />
-                      </div>
-
-                      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-                        <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">Moisture Trend</h3>
-                        <LineChart
-                          title=""
-                          labels={analysisData.soilMoistureTrend.map(item => new Date(item.date).toLocaleDateString())}
-                          datasets={[
-                            {
-                              label: 'Soil Moisture %',
-                              data: analysisData.soilMoistureTrend.map(item => item.moisture),
-                            },
-                          ]}
-                          yAxisLabel="%"
-                          xAxisLabel="Date"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-                      <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">Recommendations</h3>
-                      <ul className="space-y-2">
-                        {analysisData.recommendations.map((recommendation, index) => (
-                          <li key={index} className="flex items-start">
-                            <span className="text-green-500 mr-2">•</span>
-                            <span className="text-gray-700 dark:text-gray-300">{recommendation}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </>
                 ) : (
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center">
-                    <p className="text-gray-500 dark:text-gray-400">Click 'Analyze Field' to get satellite data</p>
-                    <button
-                      onClick={() => {
-                        setAnalysisData(null);
-                        setLoading(true);
-                      }}
-                      className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
-                    >
-                      Analyze Field
-                    </button>
-                  </div>
+                  <NdviDashboard 
+                    location={{ 
+                      lat: selectedField.coordinates[0], 
+                      lng: selectedField.coordinates[1] 
+                    }} 
+                    fieldName={selectedField.name}
+                  />
                 )}
               </>
             ) : (
@@ -521,6 +377,7 @@ const FieldMappingPage: React.FC = () => {
                 onMapClick={handleMapClick}
                 showSatellite={viewSatellite}
                 onLocationDetected={handleLocationDetected}
+                zoomLevel={13}
               />
             )}
           </div>
@@ -537,7 +394,7 @@ const FieldMappingPage: React.FC = () => {
                       <div>
                         <h4 className="font-medium text-gray-900 dark:text-white">{field.name}</h4>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {field.area} hectares | {field.crop || 'No crop planted'}
+                          {field.area} acres | {field.crop || 'No crop planted'}
                         </p>
                         {field.soilType && (
                           <p className="text-sm text-gray-500 dark:text-gray-400">Soil Type: {field.soilType}</p>

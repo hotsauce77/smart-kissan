@@ -27,12 +27,12 @@ const DashboardPage: React.FC = () => {
         (error) => {
           console.error("Error getting location:", error);
           // Fallback to default location
-          setUserLocation('Punjab, India');
+          setUserLocation('Karnataka, India');
         }
       );
     } else {
       // Fallback to default location
-      setUserLocation('Punjab, India');
+      setUserLocation('Karnataka, India');
     }
   }, []);
 
@@ -44,7 +44,7 @@ const DashboardPage: React.FC = () => {
         setLoading(true);
         
         // Use the user's actual location for weather data if available
-        const locationToUse = userLocation || 'Punjab, India';
+        const locationToUse = userLocation || 'Karnataka, India';
         
         // Fetch data in parallel
         const [
@@ -54,16 +54,42 @@ const DashboardPage: React.FC = () => {
           weatherDataRes,
           satelliteDataRes
         ] = await Promise.all([
-          apiService.getCropRecommendations({}),
-          apiService.getYieldPredictions({}),
-          apiService.getPriceForecasts({ crop: 'Rice' }),
+          apiService.getCropRecommendations({ location: locationToUse }),
+          apiService.getYieldPredictions({ location: locationToUse }),
+          apiService.getPriceForecasts({ crop: 'all', location: locationToUse }),
           apiService.getWeatherData({ location: locationToUse }),
           apiService.getSatelliteData({ location: locationToUse })
         ]);
 
-        setCropRecommendations(cropRecommendationsRes.data);
-        setYieldPredictions(yieldPredictionsRes.data);
-        setPriceForecasts(priceForecastsRes.data);
+        // Ensure we're setting array data for crop recommendations
+        if (cropRecommendationsRes.data) {
+          setCropRecommendations(Array.isArray(cropRecommendationsRes.data) 
+            ? cropRecommendationsRes.data 
+            : 'crops' in cropRecommendationsRes.data
+              ? cropRecommendationsRes.data.crops.map((crop: string, index: number) => ({
+                  id: index + 1,
+                  name: crop,
+                  confidence: ('confidence' in cropRecommendationsRes.data) 
+                    ? cropRecommendationsRes.data.confidence 
+                    : 0.85,
+                  soilType: 'Based on weather',
+                  season: getCurrentSeason()
+                }))
+              : []);
+        } else {
+          setCropRecommendations([]);
+        }
+        
+        // Set yield predictions with type checking
+        if (yieldPredictionsRes.data) {
+          setYieldPredictions(yieldPredictionsRes.data);
+        }
+        
+        // Set price forecasts with type checking
+        if (priceForecastsRes.data) {
+          setPriceForecasts(priceForecastsRes.data);
+        }
+        
         setWeatherData(weatherDataRes.data);
         
         // Check if location property exists in the weather data
@@ -84,21 +110,104 @@ const DashboardPage: React.FC = () => {
     fetchData();
   }, [userLocation]);
 
-  // Function to determine appropriate weather icon class
-  const getWeatherIconClass = (description: string) => {
-    const desc = description.toLowerCase();
-    if (desc.includes('rain') || desc.includes('drizzle') || desc.includes('shower')) {
-      return 'text-blue-500';
-    } else if (desc.includes('cloud')) {
-      return 'text-gray-500';
-    } else if (desc.includes('sun') || desc.includes('clear')) {
-      return 'text-yellow-500';
-    } else if (desc.includes('snow')) {
-      return 'text-blue-200';
-    } else if (desc.includes('thunder') || desc.includes('storm')) {
-      return 'text-purple-500';
+  // Helper function to get current season
+  const getCurrentSeason = (): string => {
+    const month = new Date().getMonth() + 1; // 1-12
+    if (month >= 3 && month <= 5) return "Summer";
+    if (month >= 6 && month <= 9) return "Monsoon";
+    if (month >= 10 && month <= 11) return "Post-Monsoon";
+    return "Winter";
+  };
+
+  // Helper function to format date and time in Indian Standard Time
+  const formatDateTime = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString('en-IN', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        day: '2-digit',
+        month: 'short',
+        timeZone: 'Asia/Kolkata'
+      });
+    } catch (e) {
+      return dateString;
     }
-    return 'text-gray-400';
+  };
+
+  // Function to get appropriate weather icon based on description and icon code
+  const getWeatherIcon = (description: string, iconCode?: string): string => {
+    // If we have an icon code, use that for more accuracy
+    if (iconCode) {
+      // WeatherAPI.com icon codes are numerical
+      const code = parseInt(iconCode);
+      
+      // Day/night is already determined in the URL pattern
+      switch (true) {
+        case code === 1000:  // Clear/Sunny
+          return 'fas fa-sun text-yellow-500';
+        case code === 1003: // Partly cloudy
+          return 'fas fa-cloud-sun text-gray-500';
+        case [1006, 1009].includes(code): // Cloudy, Overcast
+          return 'fas fa-cloud text-gray-500';
+        case [1030, 1135, 1147].includes(code): // Mist, Fog
+          return 'fas fa-smog text-gray-400';
+        case [1063, 1150, 1153, 1168, 1171].includes(code): // Light rain, patchy rain
+          return 'fas fa-cloud-rain text-blue-400';
+        case [1180, 1183, 1186, 1189, 1192, 1195].includes(code): // Rain
+          return 'fas fa-cloud-showers-heavy text-blue-500';
+        case [1066, 1114, 1117, 1210, 1213, 1216, 1219, 1222, 1225].includes(code): // Snow
+          return 'fas fa-snowflake text-blue-200';
+        case [1087, 1273, 1276, 1279, 1282].includes(code): // Thunderstorm
+          return 'fas fa-bolt text-yellow-500';
+        case [1237, 1252, 1261, 1264].includes(code): // Ice, Hail
+          return 'fas fa-icicles text-blue-200';
+        case [1069, 1072, 1198, 1201, 1204, 1207, 1240, 1243, 1246, 1249, 1252].includes(code): // Sleet, freezing rain
+          return 'fas fa-cloud-rain text-blue-300';
+        case [1255, 1258].includes(code): // Light snow showers
+          return 'fas fa-snowflake text-blue-200';
+        default:
+          break;
+      }
+    }
+    
+    // Fall back to description-based icons if no icon code is available
+    const desc = description.toLowerCase();
+    
+    if (desc.includes('thunder')) {
+      return 'fas fa-bolt text-yellow-500';
+    } else if (desc.includes('drizzle')) {
+      return 'fas fa-cloud-rain text-blue-400';
+    } else if (desc.includes('rain')) {
+      return 'fas fa-cloud-showers-heavy text-blue-500';
+    } else if (desc.includes('snow') || desc.includes('sleet') || desc.includes('hail')) {
+      return 'fas fa-snowflake text-blue-200';
+    } else if (desc.includes('mist') || desc.includes('fog') || desc.includes('haze')) {
+      return 'fas fa-smog text-gray-400';
+    } else if (desc.includes('dust') || desc.includes('sand')) {
+      return 'fas fa-wind text-yellow-600';
+    } else if (desc.includes('clear') || desc.includes('sunny')) {
+      return 'fas fa-sun text-yellow-500';
+    } else if (desc.includes('cloud')) {
+      if (desc.includes('partly')) {
+        return 'fas fa-cloud-sun text-gray-500';
+      } else {
+        return 'fas fa-cloud text-gray-500';
+      }
+    }
+    
+    // Default icon if no match
+    return 'fas fa-cloud text-gray-500';
+  };
+  
+  // Function to extract icon code from OpenWeather icon URL
+  const getIconCodeFromUrl = (iconUrl: string): string | undefined => {
+    if (!iconUrl) return undefined;
+    
+    // Extract icon code from WeatherAPI.com URLs
+    // Example: https://cdn.weatherapi.com/weather/64x64/day/116.png
+    const matches = iconUrl.match(/\/(?:day|night)\/(\d+)\.png$/);
+    return matches ? matches[1] : undefined;
   };
 
   return (
@@ -109,7 +218,7 @@ const DashboardPage: React.FC = () => {
             Dashboard
           </h2>
         </div>
-        <div className="mt-4 flex md:mt-0 md:ml-4">
+        <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
           <Link to="/field-mapping" className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
             Map Your Fields
           </Link>
@@ -142,23 +251,27 @@ const DashboardPage: React.FC = () => {
               {/* Current weather */}
               <div className="p-6 md:flex md:items-center md:justify-between border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center">
-                  {weatherData.current.icon && (
+                  {weatherData.current.icon ? (
                     <img 
-                      src={weatherData.current.icon.startsWith('//') ? `https:${weatherData.current.icon}` : weatherData.current.icon} 
+                      src={weatherData.current.icon} 
                       alt={weatherData.current.description} 
                       className="w-16 h-16 mr-4"
                     />
+                  ) : (
+                    <div className="w-16 h-16 mr-4 flex items-center justify-center text-4xl">
+                      <i className={getWeatherIcon(weatherData.current.description, getIconCodeFromUrl(weatherData.current.icon))}></i>
+                    </div>
                   )}
                   <div>
                     <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
-                      {weatherData.current.temp}°C, {weatherData.current.description}
+                      {Math.round(weatherData.current.temp)}°C, {weatherData.current.description}
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-300">
-                      Feels like {weatherData.current.feelsLike}°C • Humidity: {weatherData.current.humidity}% • 
-                      Wind: {weatherData.current.windSpeed} km/h {weatherData.current.windDirection}
+                      Feels like {Math.round(weatherData.current.feelsLike)}°C • Humidity: {weatherData.current.humidity}% • 
+                      Wind: {weatherData.current.windSpeed} m/s {weatherData.current.windDirection}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Last updated: {weatherData.current.time}
+                      Last updated: {formatDateTime(weatherData.current.time)} IST
                     </p>
                   </div>
                 </div>
@@ -182,19 +295,26 @@ const DashboardPage: React.FC = () => {
                   {weatherData.forecast.map((day: any, i: number) => (
                     <div key={i} className="text-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                       <div className="font-medium text-gray-900 dark:text-white">{day.day}</div>
-                      {day.icon && (
+                      {day.icon ? (
                         <img 
-                          src={day.icon.startsWith('//') ? `https:${day.icon}` : day.icon} 
+                          src={day.icon} 
                           alt={day.description} 
                           className="w-10 h-10 mx-auto my-1"
                         />
+                      ) : (
+                        <div className="w-10 h-10 mx-auto my-1 flex items-center justify-center text-2xl">
+                          <i className={getWeatherIcon(day.description, getIconCodeFromUrl(day.icon))}></i>
+                        </div>
                       )}
-                      <div className="font-semibold text-gray-800 dark:text-gray-100">{day.temp}°C</div>
+                      <div className="font-semibold text-gray-800 dark:text-gray-100">{Math.round(day.temp)}°C</div>
                       <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
                         <span className="text-primary-500 dark:text-primary-400">{day.rainfall} mm</span> • {day.humidity}%
                       </div>
                       <div className="text-xs mt-1 truncate text-gray-600 dark:text-gray-300" title={day.description}>
                         {day.description}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {Math.round(day.minTemp)}° - {Math.round(day.maxTemp)}°
                       </div>
                     </div>
                   ))}
@@ -212,7 +332,7 @@ const DashboardPage: React.FC = () => {
                   ) : (
                     <li>• Dry conditions. Check irrigation needs for your crops.</li>
                   )}
-                  {weatherData.current.windSpeed > 20 ? (
+                  {weatherData.current.windSpeed > 10 ? (
                     <li>• High winds may affect spraying operations and could damage tall crops.</li>
                   ) : (
                     <li>• Wind conditions are favorable for field operations.</li>
@@ -325,7 +445,7 @@ const DashboardPage: React.FC = () => {
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Price Forecast Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">Rice Price Forecast</h3>
+          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">Crop Price Forecast</h3>
           {loading ? (
             <div className="animate-pulse h-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
           ) : (
@@ -334,11 +454,27 @@ const DashboardPage: React.FC = () => {
               labels={priceForecasts.map(item => item.month)}
               datasets={[
                 {
-                  label: 'Price (₹/quintal)',
-                  data: priceForecasts.map(item => item.price),
+                  label: 'Rice (₹/kg)',
+                  data: priceForecasts.map(item => item.Rice),
+                  borderColor: '#4CAF50',
+                },
+                {
+                  label: 'Wheat (₹/kg)',
+                  data: priceForecasts.map(item => item.Wheat),
+                  borderColor: '#FFC107',
+                },
+                {
+                  label: 'Maize (₹/kg)',
+                  data: priceForecasts.map(item => item.Maize),
+                  borderColor: '#FF9800',
+                },
+                {
+                  label: 'Sugarcane (₹/kg)',
+                  data: priceForecasts.map(item => item.Sugarcane),
+                  borderColor: '#9C27B0',
                 },
               ]}
-              yAxisLabel="Price (₹)"
+              yAxisLabel="Price (₹/kg)"
               xAxisLabel="Month"
             />
           )}

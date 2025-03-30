@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import useTranslation from '../hooks/useTranslation';
@@ -11,6 +11,21 @@ const Layout: React.FC = () => {
   const { userProfile, logout, preferences } = useUser();
   const { t } = useTranslation();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
+  // Load FontAwesome when component mounts
+  useEffect(() => {
+    // Add FontAwesome CSS if not already present
+    if (!document.getElementById('font-awesome-css')) {
+      const link = document.createElement('link');
+      link.id = 'font-awesome-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+      link.integrity = 'sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==';
+      link.crossOrigin = 'anonymous';
+      link.referrerPolicy = 'no-referrer';
+      document.head.appendChild(link);
+    }
+  }, []);
 
   const isActive = (path: string) => {
     return location.pathname === path ? 'text-primary-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300';

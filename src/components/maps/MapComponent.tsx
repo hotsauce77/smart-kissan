@@ -25,10 +25,14 @@ interface MapComponentProps {
   width?: string;
   onMapClick?: (e: L.LeafletMouseEvent) => void;
   showSatellite?: boolean;
+  onMapReady?: (map: L.Map) => void;
 }
 
 // A component to handle map events
-const MapEvents: React.FC<{ onClick?: (e: L.LeafletMouseEvent) => void }> = ({ onClick }) => {
+const MapEvents: React.FC<{ 
+  onClick?: (e: L.LeafletMouseEvent) => void;
+  onMapReady?: (map: L.Map) => void;
+}> = ({ onClick, onMapReady }) => {
   const map = useMap();
   
   useEffect(() => {
@@ -36,12 +40,17 @@ const MapEvents: React.FC<{ onClick?: (e: L.LeafletMouseEvent) => void }> = ({ o
       map.on('click', onClick);
     }
     
+    // Call onMapReady with the map instance
+    if (onMapReady) {
+      onMapReady(map);
+    }
+    
     return () => {
       if (onClick) {
         map.off('click', onClick);
       }
     };
-  }, [map, onClick]);
+  }, [map, onClick, onMapReady]);
   
   return null;
 };
@@ -54,6 +63,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   width = '100%',
   onMapClick,
   showSatellite = false,
+  onMapReady,
 }) => {
   // Different tile layers
   const openStreetMapTile = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -84,7 +94,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           </Marker>
         ))}
         
-        {onMapClick && <MapEvents onClick={onMapClick} />}
+        <MapEvents onClick={onMapClick} onMapReady={onMapReady} />
       </MapContainer>
     </div>
   );

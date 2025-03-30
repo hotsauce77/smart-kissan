@@ -68,23 +68,23 @@ const mockData = {
     { id: 3, name: 'Cotton', confidence: 0.78, soilType: 'Clay Loam', season: 'Kharif' },
   ],
   yieldPredictions: [
-    { id: 1, crop: 'Rice', predictedYield: 4.5, unit: 'tons/ha', probability: 0.88 },
-    { id: 2, crop: 'Wheat', predictedYield: 3.8, unit: 'tons/ha', probability: 0.82 },
-    { id: 3, crop: 'Cotton', predictedYield: 2.2, unit: 'tons/ha', probability: 0.75 },
+    { id: 1, crop: 'Rice', predictedYield: 1800, unit: 'kg/acre', probability: 0.88 },
+    { id: 2, crop: 'Wheat', predictedYield: 1500, unit: 'kg/acre', probability: 0.82 },
+    { id: 3, crop: 'Cotton', predictedYield: 900, unit: 'kg/acre', probability: 0.75 },
   ],
   priceForecasts: [
-    { month: 'Jan', price: 1800 },
-    { month: 'Feb', price: 1850 },
-    { month: 'Mar', price: 1900 },
-    { month: 'Apr', price: 1920 },
-    { month: 'May', price: 1800 },
-    { month: 'Jun', price: 1750 },
-    { month: 'Jul', price: 1700 },
-    { month: 'Aug', price: 1800 },
-    { month: 'Sep', price: 1900 },
-    { month: 'Oct', price: 2000 },
-    { month: 'Nov', price: 1950 },
-    { month: 'Dec', price: 1900 },
+    { month: 'Jan', Rice: 19.5, Wheat: 22.0, Cotton: 60.0, Sugarcane: 3.5, Maize: 18.0 },
+    { month: 'Feb', Rice: 19.8, Wheat: 22.5, Cotton: 62.0, Sugarcane: 3.4, Maize: 18.5 },
+    { month: 'Mar', Rice: 20.2, Wheat: 23.0, Cotton: 63.5, Sugarcane: 3.3, Maize: 19.0 },
+    { month: 'Apr', Rice: 20.5, Wheat: 23.2, Cotton: 64.0, Sugarcane: 3.2, Maize: 19.5 },
+    { month: 'May', Rice: 19.0, Wheat: 22.8, Cotton: 61.0, Sugarcane: 3.1, Maize: 18.8 },
+    { month: 'Jun', Rice: 18.5, Wheat: 22.2, Cotton: 59.0, Sugarcane: 3.0, Maize: 18.2 },
+    { month: 'Jul', Rice: 18.0, Wheat: 21.8, Cotton: 57.0, Sugarcane: 2.9, Maize: 17.8 },
+    { month: 'Aug', Rice: 19.0, Wheat: 22.0, Cotton: 58.0, Sugarcane: 3.0, Maize: 18.0 },
+    { month: 'Sep', Rice: 20.0, Wheat: 22.5, Cotton: 59.5, Sugarcane: 3.1, Maize: 18.5 },
+    { month: 'Oct', Rice: 21.0, Wheat: 23.0, Cotton: 61.0, Sugarcane: 3.2, Maize: 19.0 },
+    { month: 'Nov', Rice: 20.5, Wheat: 22.8, Cotton: 60.5, Sugarcane: 3.3, Maize: 18.8 },
+    { month: 'Dec', Rice: 20.0, Wheat: 22.5, Cotton: 60.0, Sugarcane: 3.5, Maize: 18.5 },
   ],
   weatherData: {
     current: {
@@ -92,14 +92,24 @@ const mockData = {
       humidity: 65,
       description: 'Partly cloudy',
       rainfall: 0,
+      windSpeed: 10,
+      windDirection: 'NE',
+      pressure: 1015,
+      feelsLike: 30,
+      uv: 4,
+      icon: 'https://openweathermap.org/img/wn/02d@2x.png',
+      time: new Date().toISOString(),
     },
     forecast: [
-      { day: 'Today', temp: 28, rainfall: 0, description: 'Partly cloudy' },
-      { day: 'Tomorrow', temp: 29, rainfall: 0, description: 'Sunny' },
-      { day: 'Wednesday', temp: 27, rainfall: 10, description: 'Light rain' },
-      { day: 'Thursday', temp: 26, rainfall: 15, description: 'Rain' },
-      { day: 'Friday', temp: 28, rainfall: 5, description: 'Light rain' },
+      { day: 'Today', date: new Date().toISOString().split('T')[0], temp: 28, rainfall: 0, description: 'Partly cloudy', icon: 'https://openweathermap.org/img/wn/02d@2x.png', humidity: 65, maxTemp: 30, minTemp: 26 },
+      { day: 'Tomorrow', date: new Date(Date.now() + 86400000).toISOString().split('T')[0], temp: 29, rainfall: 0, description: 'Sunny', icon: 'https://openweathermap.org/img/wn/01d@2x.png', humidity: 60, maxTemp: 31, minTemp: 27 },
+      { day: 'Wed', date: new Date(Date.now() + 2*86400000).toISOString().split('T')[0], temp: 27, rainfall: 10, description: 'Light rain', icon: 'https://openweathermap.org/img/wn/10d@2x.png', humidity: 75, maxTemp: 29, minTemp: 25 },
+      { day: 'Thu', date: new Date(Date.now() + 3*86400000).toISOString().split('T')[0], temp: 26, rainfall: 15, description: 'Rain', icon: 'https://openweathermap.org/img/wn/09d@2x.png', humidity: 80, maxTemp: 28, minTemp: 24 },
+      { day: 'Fri', date: new Date(Date.now() + 4*86400000).toISOString().split('T')[0], temp: 28, rainfall: 5, description: 'Light rain', icon: 'https://openweathermap.org/img/wn/10d@2x.png', humidity: 70, maxTemp: 30, minTemp: 26 },
     ],
+    location: 'Default City',
+    region: 'Default Region',
+    country: 'Default Country',
   },
   satelliteData: {
     ndvi: 0.72, // Normalized Difference Vegetation Index
@@ -113,17 +123,22 @@ const mockData = {
 // Weather API service implementation for real-time weather data
 const fetchWeatherData = async (location: string) => {
   try {
-    const apiKey = 'bad08676f5c5412abde204419252903'; // WeatherAPI key
-    const response = await axios.get(
-      `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${encodeURIComponent(location)}&days=5&aqi=no&alerts=no`
-    );
+    const apiKey = 'bad08676f5c5412abde204419252903'; // WeatherAPI.com key
     
-    // Map the API response to our app's data structure
+    // WeatherAPI.com accepts both location names and lat,lon format
+    const url = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${encodeURIComponent(location)}&days=5&aqi=no&alerts=no`;
+    
+    const response = await axios.get(url);
+    
+    // Map the WeatherAPI.com response to our app's data structure
     if (response.data) {
-      const { current, forecast } = response.data;
+      // Current weather data
+      const current = response.data.current;
+      const location = response.data.location;
       
       // Format forecast data
-      const forecastDays = forecast.forecastday.map((day: any) => {
+      const forecastDays = response.data.forecast.forecastday.map((day: any) => {
+        // Get date information
         const date = new Date(day.date);
         const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
         
@@ -147,18 +162,18 @@ const fetchWeatherData = async (location: string) => {
           humidity: current.humidity,
           description: current.condition.text,
           rainfall: current.precip_mm,
-          windSpeed: current.wind_kph,
-          windDirection: current.wind_dir,
+          windSpeed: current.wind_kph / 3.6, // convert to m/s
+          windDirection: getWindDirection(current.wind_degree),
           pressure: current.pressure_mb,
           feelsLike: current.feelslike_c,
           uv: current.uv,
           icon: current.condition.icon,
-          time: current.last_updated,
+          time: current.last_updated_epoch * 1000,
         },
         forecast: forecastDays,
-        location: response.data.location.name,
-        region: response.data.location.region,
-        country: response.data.location.country,
+        location: location.name,
+        region: location.region,
+        country: location.country,
       };
     }
     
@@ -169,235 +184,307 @@ const fetchWeatherData = async (location: string) => {
   }
 };
 
-// API service with methods for each feature
-export const apiService = {
-  // Crop Recommendations
-  getCropRecommendations: async (params: { soilType?: string; location?: string }) => {
-    try {
-      // In a real application, we would make an API call:
-      // const response = await api.get('/crop-recommendations', { params });
-      // return response.data;
-      
-      // For now, return mock data
-      return { data: mockData.cropRecommendations };
-    } catch (error) {
-      console.error('Error fetching crop recommendations:', error);
-      throw error;
-    }
-  },
+// Helper function to convert wind degrees to direction
+function getWindDirection(degrees: number): string {
+  const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+  const index = Math.round(degrees / 22.5) % 16;
+  return directions[index];
+}
 
-  // Yield Predictions
-  getYieldPredictions: async (params: { crop?: string; location?: string }) => {
-    try {
-      // In a real application, we would make an API call:
-      // const response = await api.get('/yield-predictions', { params });
-      // return response.data;
-      
-      // For now, return mock data
-      return { data: mockData.yieldPredictions };
-    } catch (error) {
-      console.error('Error fetching yield predictions:', error);
-      throw error;
-    }
-  },
-
-  // Price Forecasting
-  getPriceForecasts: async (params: { crop: string; period?: string }) => {
-    try {
-      // In a real application, we would make an API call:
-      // const response = await api.get('/price-forecasts', { params });
-      // return response.data;
-      
-      // For now, return mock data
-      return { data: mockData.priceForecasts };
-    } catch (error) {
-      console.error('Error fetching price forecasts:', error);
-      throw error;
-    }
-  },
-
-  // Weather Data
-  getWeatherData: async (params: { location: string }) => {
-    try {
-      // Try to fetch real weather data
-      const realWeatherData = await fetchWeatherData(params.location);
-      return { data: realWeatherData };
-    } catch (error) {
-      console.error('Error fetching weather data, falling back to mock data:', error);
-      
-      // Fallback to mock data if real API fails
-      return { data: mockData.weatherData };
-    }
-  },
-
-  // Satellite Analysis
-  getSatelliteData: async (params: { location: string; date?: string }) => {
-    try {
-      // In a real application, we would make an API call:
-      // const response = await api.get('/satellite-data', { params });
-      // return response.data;
-      
-      // For now, return mock data
-      return { data: mockData.satelliteData };
-    } catch (error) {
-      console.error('Error fetching satellite data:', error);
-      throw error;
-    }
-  },
-
-  // Chat with AI Assistant (WebSocket implementation)
-  sendChatMessage: async (message: string, language: string = 'en') => {
-    try {
-      // Initialize WebSocket if needed
-      if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
-        initChatWebSocket();
-        // If we're still connecting, wait a bit
-        if (chatSocket && chatSocket.readyState === WebSocket.CONNECTING) {
-          await new Promise(resolve => setTimeout(resolve, 1500));
+// Reverse geocoding function to get location name from coordinates
+const reverseGeocode = async (lat: number, lon: number) => {
+  try {
+    // Using OpenStreetMap Nominatim API (free, no key required)
+    const response = await axios.get(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`,
+      {
+        headers: {
+          'User-Agent': 'SmartKissan Farming App' // Required by Nominatim Terms of Use
         }
       }
+    );
+    
+    if (response.data) {
+      // Extract relevant location data
+      const addressData = response.data.address || {};
       
-      // If we still don't have a connection, fall back to mock
-      if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
-        console.warn('Using mock response because WebSocket is not available');
-        return getMockResponse(message, language);
-      }
-      
-      // Add Indian farming context to the message
-      const contextEnhancedMessage = {
-        id: Date.now().toString(),
-        message: message,
-        context: {
-          domain: "agriculture",
-          region: "India",
-          language_preference: language, // Use the user's language preference
-          expertise_level: "farmer",
-          crops_of_interest: ["rice", "wheat", "cotton", "pulses"],
-          current_season: getCurrentSeason(),
-          include_local_knowledge: true
+      return {
+        data: {
+          name: response.data.display_name || '',
+          city: addressData.city || addressData.town || addressData.village || '',
+          region: addressData.state || addressData.county || '',
+          country: addressData.country || '',
+          countryCode: addressData.country_code || '',
         }
       };
-      
-      return new Promise((resolve) => {
-        const msgId = contextEnhancedMessage.id;
-        
-        // Set up callback for this specific message
-        messageCallbacks[msgId] = (response) => {
-          resolve({
-            data: {
-              response: translateResponse(response, language),
-              timestamp: new Date().toISOString()
-            }
-          });
-        };
-        
-        // Send the message
-        if (chatSocket) {
-          chatSocket.send(JSON.stringify(contextEnhancedMessage));
-        }
-        
-        // Set a timeout for fallback to mock
-        setTimeout(() => {
-          if (messageCallbacks[msgId]) {
-            delete messageCallbacks[msgId];
-            console.warn('WebSocket response timeout, using fallback');
-            resolve(getMockResponse(message, language));
-          }
-        }, 5000); // 5-second timeout (reduced from 10)
-      });
-    } catch (error) {
-      console.error('Error sending chat message:', error);
-      return getMockResponse(message, language);
     }
-  },
+    
+    throw new Error('Invalid response from geocoding API');
+  } catch (error) {
+    console.error('Error reverse geocoding:', error);
+    throw error;
+  }
 };
 
-// Helper function to get mock responses for different languages
-function getMockResponse(message: string, language: string) {
-  // Extract key terms for context-aware responses
+// Fetch crop recommendations based on soil and climate data
+const fetchCropRecommendations = async (lat: number, lon: number) => {
+  try {
+    // For now, we'll simulate crop recommendations based on location
+    // In a real implementation, this would call a real AI/ML service
+    
+    // Get weather data for the location
+    const locationStr = `${lat},${lon}`;
+    const weatherData = await fetchWeatherData(locationStr);
+    
+    // Basic logic to determine suitable crops based on temperature and rainfall
+    const currentTemp = weatherData.current.temp;
+    const humidity = weatherData.current.humidity;
+    
+    let recommendedCrops = [];
+    
+    // Very basic logic - would be much more sophisticated in a real app
+    if (currentTemp > 25 && humidity > 60) {
+      recommendedCrops = ['Rice', 'Cotton', 'Sugarcane'];
+    } else if (currentTemp > 20 && currentTemp <= 25) {
+      recommendedCrops = ['Wheat', 'Barley', 'Mustard'];
+    } else if (currentTemp > 15 && currentTemp <= 20) {
+      recommendedCrops = ['Potato', 'Peas', 'Beans'];
+    } else {
+      recommendedCrops = ['Cabbage', 'Cauliflower', 'Lettuce'];
+    }
+    
+    // Create location object with default values
+    const locationInfo = {
+      name: `${lat}, ${lon}`,
+      region: '',
+      country: ''
+    };
+    
+    // Use type assertion to safely access optional properties from weatherData
+    // This works because we know the API returns these fields when successful
+    const weatherDataExtended = weatherData as {
+      current: typeof weatherData.current;
+      forecast: typeof weatherData.forecast;
+      location?: string;
+      region?: string;
+      country?: string;
+    };
+    
+    if (weatherDataExtended.location) {
+      locationInfo.name = weatherDataExtended.location;
+    }
+    if (weatherDataExtended.region) {
+      locationInfo.region = weatherDataExtended.region;
+    }
+    if (weatherDataExtended.country) {
+      locationInfo.country = weatherDataExtended.country;
+    }
+    
+    return {
+      data: {
+        crops: recommendedCrops,
+        confidence: 0.85,
+        location: locationInfo,
+        weatherSummary: {
+          temperature: currentTemp,
+          humidity: humidity,
+          description: weatherData.current.description
+        }
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching crop recommendations:', error);
+    // Fall back to mock data
+    return { 
+      data: mockData.cropRecommendations
+    };
+  }
+};
+
+// API service with methods for each feature
+export const apiService = {
+  // Add reverse geocoding to the API service
+  reverseGeocode: async (lat: number, lon: number) => {
+    try {
+      const result = await reverseGeocode(lat, lon);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Reverse geocoding error:', error);
+      return { success: false, error: 'Failed to get location' };
+    }
+  },
+  
+  // Crop recommendations based on location and season
+  getCropRecommendations: async (params: { location?: string; lat?: number; lon?: number } = {}) => {
+    try {
+      if (params.lat && params.lon) {
+        const result = await fetchCropRecommendations(params.lat, params.lon);
+        return result;
+      }
+      // Fallback to mock data
+      return { success: true, data: mockData.cropRecommendations };
+    } catch (error) {
+      console.error('Error fetching crop recommendations:', error);
+      return { success: false, error: 'Failed to get crop recommendations' };
+    }
+  },
+  
+  // Yield prediction
+  getYieldPredictions: async (params: { crop?: string; location?: string } = {}) => {
+    try {
+      // In a real app, this would call a real API
+      // For now, return mock data
+      let filteredData = mockData.yieldPredictions;
+      if (params.crop) {
+        filteredData = filteredData.filter(item => 
+          item.crop.toLowerCase() === params.crop?.toLowerCase()
+        );
+      }
+      return { success: true, data: filteredData };
+    } catch (error) {
+      console.error('Error fetching yield predictions:', error);
+      return { success: false, error: 'Failed to get yield predictions' };
+    }
+  },
+  
+  // Price forecasting
+  getPriceForecasts: async (params: { crop?: string; location?: string } = {}) => {
+    try {
+      // In a real app, this would call a real API
+      // For now, return mock data
+      type PriceForecast = typeof mockData.priceForecasts[0];
+      let data = [...mockData.priceForecasts];
+      
+      // If specific crop is requested, filter to include only that crop
+      if (params.crop && params.crop !== 'all') {
+        const cropName = params.crop.charAt(0).toUpperCase() + params.crop.slice(1).toLowerCase();
+        if (data[0][cropName as keyof PriceForecast] !== undefined) {
+          // Create a new array with just the requested crop data
+          const filteredData = data.map(item => {
+            const result: Record<string, any> = {
+              month: item.month
+            };
+            result[cropName] = item[cropName as keyof PriceForecast];
+            return result;
+          });
+          
+          return { success: true, data: filteredData };
+        }
+      }
+      
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error fetching price forecasts:', error);
+      return { success: false, error: 'Failed to get price forecasts' };
+    }
+  },
+  
+  // Weather data - now using the real implementation from above
+  getWeatherData: async (params: { location?: string; lat?: number; lon?: number }) => {
+    try {
+      let locationString;
+      
+      if (params.location) {
+        locationString = params.location;
+      } else if (params.lat !== undefined && params.lon !== undefined) {
+        locationString = `${params.lat},${params.lon}`;
+      } else {
+        throw new Error('Either location name or coordinates must be provided');
+      }
+      
+      const result = await fetchWeatherData(locationString);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+      // Fall back to mock data in case of error
+      return { success: true, data: mockData.weatherData, isMock: true };
+    }
+  },
+  
+  // Satellite analysis
+  getSatelliteData: async (params: { location?: string; lat?: number; lon?: number }) => {
+    try {
+      // In a real app, this would call a real API
+      // For now, return mock data
+      return { success: true, data: mockData.satelliteData };
+    } catch (error) {
+      console.error('Error fetching satellite data:', error);
+      return { success: false, error: 'Failed to get satellite data' };
+    }
+  },
+  
+  // Send chat message to AI service
+  sendChatMessage: async (
+    message: string,
+    language: string = 'en',
+    userLocation?: any,
+    messageHistory?: any[],
+    enhancedContext?: any
+  ) => {
+    try {
+      // For now, return mock responses
+      return {
+        data: {
+          response: generateMockResponse(message, language, userLocation),
+          timestamp: new Date().toISOString(),
+          richData: null
+        }
+      };
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      throw error;
+    }
+  }
+};
+
+// Helper function to generate a mock response
+const generateMockResponse = (message: string, language: string, userLocation?: any) => {
+  // Simple mock responses for different types of queries
   const lowerMessage = message.toLowerCase();
-  let responseType: 'default' | 'weather' | 'pest' | 'crop' = "default";
   
-  if (lowerMessage.includes("weather") || lowerMessage.includes("rain") || 
-      lowerMessage.includes("mausam") || lowerMessage.includes("barish") ||
-      lowerMessage.includes("ಹವಾಮಾನ") || lowerMessage.includes("ಮಳೆ")) {
-    responseType = "weather";
-  } else if (lowerMessage.includes("pest") || lowerMessage.includes("insect") || 
-             lowerMessage.includes("keet") || lowerMessage.includes("keetnashak") ||
-             lowerMessage.includes("ಕೀಟ") || lowerMessage.includes("ಕೀಟನಾಶಕ")) {
-    responseType = "pest";
-  } else if (lowerMessage.includes("crop") || lowerMessage.includes("plant") || 
-             lowerMessage.includes("fasal") || lowerMessage.includes("ugaana") ||
-             lowerMessage.includes("ಬೆಳೆ") || lowerMessage.includes("ಬೀಜ")) {
-    responseType = "crop";
+  // Weather related
+  if (lowerMessage.includes('weather') || lowerMessage.includes('rain') || lowerMessage.includes('forecast')) {
+    if (userLocation) {
+      return language === 'hi' ? 
+        `${userLocation.locationName} में आज का मौसम आंशिक रूप से बादल छाए रहने की संभावना है, तापमान 28°C, आर्द्रता 65% है।` :
+        language === 'kn' ? 
+        `${userLocation.locationName} ನಲ್ಲಿ ಇಂದಿನ ಹವಾಮಾನ ಭಾಗಶಃ ಮೋಡ ಕವಿದಿರುವ ಸಾಧ್ಯತೆಯಿದೆ, ತಾಪಮಾನ 28°C, ಆರ್ದ್ರತೆ 65% ಇದೆ.` :
+        `Today's weather in ${userLocation.locationName} is likely to be partly cloudy with a temperature of 28°C and humidity of 65%.`;
+    } else {
+      return language === 'hi' ? 
+        `क्षमा करें, मौसम की जानकारी देने के लिए आपके स्थान की जानकारी आवश्यक है।` :
+        language === 'kn' ? 
+        `ಕ್ಷಮಿಸಿ, ಹವಾಮಾನ ಮಾಹಿತಿಯನ್ನು ಒದಗಿಸಲು ನಿಮ್ಮ ಸ್ಥಳದ ಮಾಹಿತಿ ಅಗತ್ಯವಿದೆ.` :
+        `Sorry, I need your location information to provide weather updates.`;
+    }
   }
   
-  const responses: Record<string, Record<string, string>> = {
-    default: {
-      en: `I understand your question about "${message}". As your farming assistant, I recommend consulting your local agricultural extension for specific advice on this topic.`,
-      hi: `मैं आपके प्रश्न "${message}" को समझता हूँ। आपके कृषि सहायक के रूप में, मैं इस विषय पर विशिष्ट सलाह के लिए आपके स्थानीय कृषि विस्तार से परामर्श करने की सलाह देता हूँ।`,
-      kn: `ನಾನು ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಂಡಿದ್ದೇನೆ "${message}". ನಿಮ್ಮ ಕೃಷಿ ಸಹಾಯಕನಾಗಿ, ಈ ವಿಷಯದ ಬಗ್ಗೆ ನಿರ್ದಿಷ್ಟ ಸಲಹೆಗಾಗಿ ನಿಮ್ಮ ಸ್ಥಳೀಯ ಕೃಷಿ ವಿಸ್ತರಣೆಯನ್ನು ಸಂಪರ್ಕಿಸಲು ನಾನು ಸಲಹೆ ನೀಡುತ್ತೇನೆ.`
-    },
-    weather: {
-      en: `Based on recent data, weather conditions in major agricultural regions of India are currently suitable for farming activities. Monsoon progress is normal in most areas with adequate rainfall for crop development.`,
-      hi: `हाल के आंकड़ों के अनुसार, भारत के प्रमुख कृषि क्षेत्रों में मौसम की स्थिति वर्तमान में कृषि गतिविधियों के लिए उपयुक्त है। अधिकांश क्षेत्रों में मानसून की प्रगति फसल विकास के लिए पर्याप्त वर्षा के साथ सामान्य है।`,
-      kn: `ಇತ್ತೀಚಿನ ಮಾಹಿತಿಯ ಪ್ರಕಾರ, ಭಾರತದ ಪ್ರಮುಖ ಕೃಷಿ ಪ್ರದೇಶಗಳಲ್ಲಿ ಹವಾಮಾನ ಪರಿಸ್ಥಿತಿಗಳು ಪ್ರಸ್ತುತ ಕೃಷಿ ಚಟುವಟಿಕೆಗಳಿಗೆ ಸೂಕ್ತವಾಗಿವೆ. ಹೆಚ್ಚಿನ ಪ್ರದೇಶಗಳಲ್ಲಿ ಮುಂಗಾರು ಪ್ರಗತಿಯು ಬೆಳೆ ಬೆಳವಣಿಗೆಗೆ ಸಾಕಷ್ಟು ಮಳೆಯೊಂದಿಗೆ ಸಾಮಾನ್ಯವಾಗಿದೆ.`
-    },
-    pest: {
-      en: `For sustainable pest management, consider neem oil, beneficial insects like ladybugs, and proper crop rotation. Integrated Pest Management (IPM) techniques reduce chemical usage while protecting your crops.`,
-      hi: `टिकाऊ कीट प्रबंधन के लिए, नीम तेल, लेडीबग जैसे लाभकारी कीड़े और उचित फसल चक्र पर विचार करें। एकीकृत कीट प्रबंधन (IPM) तकनीकें आपकी फसलों की रक्षा करते हुए रासायनिक उपयोग को कम करती हैं।`,
-      kn: `ಸುಸ್ಥಿರ ಕೀಟ ನಿರ್ವಹಣೆಗಾಗಿ, ಬೇವಿನ ಎಣ್ಣೆ, ಲೇಡಿಬಗ್‌ಗಳಂತಹ ಲಾಭದಾಯಕ ಕೀಟಗಳು ಮತ್ತು ಸರಿಯಾದ ಬೆಳೆ ತಿರುಗುವಿಕೆಯನ್ನು ಪರಿಗಣಿಸಿ. ಸಮಗ್ರ ಕೀಟ ನಿರ್ವಹಣೆ (IPM) ತಂತ್ರಗಳು ನಿಮ್ಮ ಬೆಳೆಗಳನ್ನು ರಕ್ಷಿಸುವ ಜೊತೆಗೆ ರಾಸಾಯನಿಕ ಬಳಕೆಯನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತವೆ.`
-    },
-    crop: {
-      en: `Consider your local soil type and current season when selecting crops. Rice, wheat, cotton, and pulses are major crops in India with varying planting seasons. Contact your local agricultural extension for region-specific recommendations.`,
-      hi: `फसलों का चयन करते समय अपने स्थानीय मिट्टी के प्रकार और वर्तमान मौसम पर विचार करें। चावल, गेहूं, कपास और दालें भारत में विभिन्न रोपण मौसम के साथ प्रमुख फसलें हैं। क्षेत्र-विशिष्ट सिफारिशों के लिए अपने स्थानीय कृषि विस्तार से संपर्क करें।`,
-      kn: `ಬೆಳೆಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡುವಾಗ ನಿಮ್ಮ ಸ್ಥಳೀಯ ಮಣ್ಣಿನ ಪ್ರಕಾರ ಮತ್ತು ಪ್ರಸ್ತುತ ಋತುವನ್ನು ಪರಿಗಣಿಸಿ. ಭತ್ತ, ಗೋಧಿ, ಹತ್ತಿ ಮತ್ತು ಬೇಳೆಕಾಳುಗಳು ವಿವಿಧ ನೆಡುವ ಋತುಗಳೊಂದಿಗೆ ಭಾರತದಲ್ಲಿ ಪ್ರಮುಖ ಬೆಳೆಗಳಾಗಿವೆ. ಪ್ರದೇಶ-ನಿರ್ದಿಷ್ಟ ಶಿಫಾರಸುಗಳಿಗಾಗಿ ನಿಮ್ಮ ಸ್ಥಳೀಯ ಕೃಷಿ ವಿಸ್ತರಣೆಯನ್ನು ಸಂಪರ್ಕಿಸಿ.`
-    }
-  };
-  
-  // Fall back to English if the language is not supported
-  const langKey = (language in responses[responseType]) ? language : 'en';
-  
-  return {
-    data: {
-      response: responses[responseType][langKey],
-      timestamp: new Date().toISOString()
-    }
-  };
-}
-
-// Function to translate responses to the correct language if needed
-function translateResponse(response: string, language: string): string {
-  // If the response is already in the correct language, return it as is
-  if (
-    (language === 'hi' && containsHindi(response)) || 
-    (language === 'kn' && containsKannada(response)) ||
-    (language === 'en' && !containsHindi(response) && !containsKannada(response))
-  ) {
-    return response;
+  // Crop related
+  else if (lowerMessage.includes('crop') || lowerMessage.includes('plant') || lowerMessage.includes('grow')) {
+    return language === 'hi' ? 
+      `इस मौसम में अच्छी फसलों में शामिल हैं: चावल, गेहूं, और मक्का। क्या आप किसी विशेष फसल के बारे में जानना चाहते हैं?` :
+      language === 'kn' ? 
+      `ಈ ಋತುವಿನಲ್ಲಿ ಉತ್ತಮ ಬೆಳೆಗಳು: ಭತ್ತ, ಗೋಧಿ, ಮತ್ತು ಮೆಕ್ಕೆಜೋಳ. ನೀವು ಯಾವುದಾದರೂ ನಿರ್ದಿಷ್ಟ ಬೆಳೆಯ ಬಗ್ಗೆ ತಿಳಿಯಲು ಬಯಸುವಿರಾ?` :
+      `Good crops for this season include: Rice, Wheat, and Maize. Would you like to know about a specific crop?`;
   }
   
-  // Otherwise, use the mock response system to generate a response in the correct language
-  const mockResponse = getMockResponse(response, language);
-  return mockResponse.data.response;
-}
-
-// Simple detection of Hindi and Kannada scripts
-function containsHindi(text: string): boolean {
-  return /[\u0900-\u097F]/.test(text);
-}
-
-function containsKannada(text: string): boolean {
-  return /[\u0C80-\u0CFF]/.test(text);
-}
-
-// Helper function to get current season in India
-function getCurrentSeason(): string {
-  const month = new Date().getMonth() + 1; // 1-12
-  if (month >= 3 && month <= 5) return "summer";
-  if (month >= 6 && month <= 9) return "monsoon";
-  if (month >= 10 && month <= 11) return "post-monsoon";
-  return "winter";
-}
+  // Price/market related
+  else if (lowerMessage.includes('price') || lowerMessage.includes('market') || lowerMessage.includes('sell')) {
+    return language === 'hi' ? 
+      `वर्तमान बाजार मूल्य: चावल - ₹1950/क्विंटल, गेहूं - ₹2250/क्विंटल, कपास - ₹6200/क्विंटल।` :
+      language === 'kn' ? 
+      `ಪ್ರಸ್ತುತ ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು: ಅಕ್ಕಿ - ₹1950/ಕ್ವಿಂಟಾಲ್, ಗೋಧಿ - ₹2250/ಕ್ವಿಂಟಾಲ್, ಹತ್ತಿ - ₹6200/ಕ್ವಿಂಟಾಲ್.` :
+      `Current market prices: Rice - ₹1950/quintal, Wheat - ₹2250/quintal, Cotton - ₹6200/quintal.`;
+  }
+  
+  // General response
+  else {
+    return language === 'hi' ? 
+      `मैं आपकी कैसे मदद कर सकता हूँ? मैं मौसम, फसल सलाह, या बाजार मूल्य के बारे में जानकारी प्रदान कर सकता हूँ।` :
+      language === 'kn' ? 
+      `ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು? ನಾನು ಹವಾಮಾನ, ಬೆಳೆ ಸಲಹೆ, ಅಥವಾ ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳ ಬಗ್ಗೆ ಮಾಹಿತಿಯನ್ನು ಒದಗಿಸಬಲ್ಲೆ.` :
+      `How can I help you? I can provide information about weather, crop advice, or market prices.`;
+  }
+};
 
 export default apiService; 
