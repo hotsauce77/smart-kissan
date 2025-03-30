@@ -96,6 +96,8 @@ The NDVI values range from **-1 to 1**:
 
 ![Screenshot 2025-03-30 111028](https://github.com/user-attachments/assets/db0e57ec-2733-429b-bb44-19e9ad6cc7ab)
 
+![Screenshot 2025-03-30 112318](https://github.com/user-attachments/assets/78ddf44d-e315-4349-a38e-a03c1dd610e9)
+
 ### Model outcomes
 
 ![WhatsApp Image 2025-03-30 at 10 59 41](https://github.com/user-attachments/assets/bc94efe7-e269-4e57-9b81-8b989cf3ccb5)
